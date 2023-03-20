@@ -1,4 +1,4 @@
-import { Header } from "../../components/Header";
+import { Header } from "../components/Header";
 import styles from '../../login.module.css'
 
 export default function Cadastro() {

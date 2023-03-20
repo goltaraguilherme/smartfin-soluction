@@ -1,5 +1,5 @@
 import ReactApexChart from "react-apexcharts";
-import { FiiData } from "../../assets/pages/Dashboard";
+import { FiiData } from "../../pages/Dashboard";
 import { ApexOptions } from "apexcharts";
 
 type FiiCardsProps = {

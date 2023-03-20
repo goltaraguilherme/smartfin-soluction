@@ -1,11 +1,11 @@
 import { useEffect, useState } from "react";
-import FiiCards from "../../components/Dashboard/FIICard";
-import { Header } from "../../components/Header";
+import FiiCards from "../components/Dashboard/FIICard";
+import { Header } from "../components/Header";
 import axios from 'axios';
-import { CardMenu } from "../../components/Dashboard/CardMenu";
-import { CardGanhos } from "../../components/Dashboard/CardGanhos";
-import { CardVisaoGeral } from "../../components/Dashboard/CardVisaoGeral";
-import { CardNoticias } from "../../components/Dashboard/CardNoticias";
+import { CardMenu } from "../components/Dashboard/CardMenu";
+import { CardGanhos } from "../components/Dashboard/CardGanhos";
+import { CardVisaoGeral } from "../components/Dashboard/CardVisaoGeral";
+import { CardNoticias } from "../components/Dashboard/CardNoticias";
 
 export type FiiData = {
   id: number;

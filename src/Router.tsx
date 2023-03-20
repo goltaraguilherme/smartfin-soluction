@@ -1,10 +1,10 @@
 import { Fragment } from "react";
 import { Route, Routes } from "react-router-dom";
-import Cadastro from "./assets/pages/Cadastro";
-import Carteira from "./assets/pages/Carteira";
-import Dashboard from "./assets/pages/Dashboard";
-import Login from "./assets/pages/Login";
-import RendaVariavel from "./assets/pages/RendaVariavel";
+import Cadastro from "./pages/Cadastro";
+import Carteira from "./pages/Carteira";
+import Dashboard from "./pages/Dashboard";
+import Login from "./pages/Login";
+import RendaVariavel from "./pages/RendaVariavel";
 
 export function Router() {
   return (

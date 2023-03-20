@@ -1,8 +1,8 @@
 import axios from 'axios';
 import { useEffect, useState } from 'react'
-import { CardMenu } from "../../components/Dashboard/CardMenu";
-import { Header } from "../../components/Header";
-import Fii from "../../components/RendaVariavel/Fii";
+import { CardMenu } from "../components/Dashboard/CardMenu";
+import { Header } from "../components/Header";
+import Fii from "../components/RendaVariavel/Fii";
 
 export type FiiData = {
   id: number;

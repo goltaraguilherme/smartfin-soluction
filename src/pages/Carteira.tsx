@@ -1,8 +1,8 @@
-import { CardMeusAtivos } from "../../components/Carteira/CardMeusAtivos";
-import { CardPatrimonio } from "../../components/Carteira/CardPatrimõnio";
-import { CardRentabilidade } from "../../components/Carteira/CardRentabilidade";
-import { CardMenu } from "../../components/Dashboard/CardMenu";
-import { Header } from "../../components/Header";
+import { CardMeusAtivos } from "../components/Carteira/CardMeusAtivos";
+import { CardPatrimonio } from "../components/Carteira/CardPatrimõnio";
+import { CardRentabilidade } from "../components/Carteira/CardRentabilidade";
+import { CardMenu } from "../components/Dashboard/CardMenu";
+import { Header } from "../components/Header";
 
 
 export default function Carteira() {
