@@ -1,7 +1,7 @@
 import { FormEvent, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
-import styles from '../../login.module.css'
+import styles from '../login.module.css'
 
 export default function Login() {
 
