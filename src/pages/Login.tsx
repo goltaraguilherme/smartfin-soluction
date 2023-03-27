@@ -13,7 +13,7 @@ export default function Login() {
   const [password, setPassword] = useState('');
   const [error, setError] = useState("")
 
-  const handleLogin = (e: FormEvent) => {
+  function handleLogin(e: FormEvent) {
     e.preventDefault();
 
     if (!email || !password) {
@@ -33,8 +33,8 @@ export default function Login() {
 
       <div className="col-lg-6 bg-[#13141B] h-[100vh]">
         <div className="container">
-          <div>
-            
+          <div className={styles.centralizar}>
+            <img className="pt-10" src="../../public/logo.png" alt="" />
           </div>
         </div>
       </div>
@@ -46,11 +46,13 @@ export default function Login() {
 
                 <h4 className="font-bold text-left pb-4">Entre ou crie sua conta</h4>
 
-                <form action="">
+                <form action="" onSubmit={handleLogin}>
 
                   <label htmlFor="email" className="pb-2">Email</label>
                   <br />
-                  <input style={{
+                  <input 
+                  onChange={(e) => setEmail(e.target.value)}
+                  style={{
                     borderRadius: '10px'
                   }} className="w-[80%] p-2 bg-transparent border border-[#505050]" type="email" id="email" placeholder="Seu email" />
 
@@ -58,7 +60,9 @@ export default function Login() {
 
                   <label className="pb-2" htmlFor="name">Senha</label>
                   <br />
-                  <input style={{
+                  <input 
+                  onChange={(e) => setPassword(e.target.value)}
+                  style={{
                     borderRadius: '10px'
                   }} className="w-[80%] p-2 bg-transparent border border-white" type="password" id="celular" placeholder="Sua senha" />
                   <br /><br />

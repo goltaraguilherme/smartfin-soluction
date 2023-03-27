@@ -1,6 +1,7 @@
 import ReactApexChart from "react-apexcharts";
 import { FiiData } from "../../pages/Dashboard";
 import { ApexOptions } from "apexcharts";
+import LiquidityChart from "../LiquidityCharts";
 
 type FiiCardsProps = {
   fiiData: FiiData[];
@@ -61,6 +62,7 @@ function FiiCards(props: FiiCardsProps) {
 
               <div className="">
                 <p className="text-[#01E59B] font-medium">{fii.Rentab_Periodo}</p>
+           
               </div> 
           </div>
 

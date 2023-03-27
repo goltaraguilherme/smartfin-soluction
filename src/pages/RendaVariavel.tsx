@@ -60,7 +60,19 @@ export default function RendaVariavel() {
       <Header />
 
       <div className="m-16 rounded p-16 bg-[#201F25]">
-        <h1 className="text-white text-3xl font-bold mb-3">Renda Variável</h1>
+
+        <div className="flex justify-between">
+
+        <div>
+          <h1 className="text-white text-3xl font-bold mb-3">Renda Variável</h1>  
+        </div>
+
+        <div>
+          <button className='bg-[#2D9BFC] text-white p-2 font-semibold' style={{borderRadius: '10px' }}>Filtro</button>
+        </div>
+
+        </div>
+
 
         <div className="row">
 
