@@ -9,7 +9,7 @@ export const Header = () => {
       </div>
 
       <div> 
-          <input className="w-[20vw] border-0 outline-0 rounded p-2 bg-gray-800 text-white" type="search" placeholder="Pesquise por ativos, noticias e muito mais..."/>
+          <input className="w-[20vw] border-0 outline-0 rounded p-2 bg-gray-800 color-t" type="search" placeholder="Pesquise por ativos, noticias e muito mais..."/>
       </div>
     
       </div>

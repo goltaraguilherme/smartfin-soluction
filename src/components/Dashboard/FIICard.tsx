@@ -1,7 +1,11 @@
 import ReactApexChart from "react-apexcharts";
 import { FiiData } from "../../pages/Dashboard";
 import { ApexOptions } from "apexcharts";
-import LiquidityChart from "../LiquidityCharts";
+import SwiperCore, { Pagination, Navigation, Autoplay } from 'swiper';
+import 'swiper/swiper-bundle.css';
+import { Swiper, SwiperSlide } from 'swiper/react';
+import { useState } from "react";
+
 
 type FiiCardsProps = {
   fiiData: FiiData[];
@@ -14,64 +18,40 @@ function formatarNumeroBRL(numero: number): string {
 function FiiCards(props: FiiCardsProps) {
   const { fiiData } = props;
 
-  const chartOptions: ApexOptions = {
-    chart: {
-      height: 350,
-      type: 'area',
-      zoom: {
-        enabled: false
-      }
-    },
-    dataLabels: {
-      enabled: false
-    },
-    stroke: {
-      curve: 'straight'
-    },
-    series: [{
-      name: "Variação do Preço",
-      data: fiiData.slice(0, 12).map((fii) => fii.variacao_preco),
-    }],
-    title: {
-      text: "Variação do Preço nos últimos 12 meses",
-      align: 'left'
-    },
-    xaxis: {
-      categories: fiiData.slice(0, 12).map((fii) => fii.C_digodo_fundo),
-    },
-    yaxis: {
-      labels: {
-        formatter: function (val: number) {
-          return formatarNumeroBRL(val);
-        }
-      },
-    },
-  };
+
+  SwiperCore.use([Autoplay, Navigation, Pagination]);
+
 
   return (
-    <div className="flex column-xs border border-gray rounded p-4 w-[100%]">
+    <div className="flex column-xs border border-gray rounded p-4 ">
    
-      {fiiData.slice(0, 4).map((fii) => (
-        <div className="rounded mx-1 p-3 w-[100%] bg-[#23242F]" key={fii.id}>
+   <Swiper
+      slidesPerView={4}
+      spaceBetween={10}
 
-          <div className="flex items-start justify-between">
+      loop={true}
+      autoplay={{delay: 2000}}
+      className="mySwiper"
+    >
+      {fiiData.map((fii) => (
+        <SwiperSlide key={fii.id}>
+          <div className="rounded mx-1 p-3 w-[100%] bg-[#23242F]">
+            <div className="flex items-start justify-between">
               <div className="">
-              <h2 className="text-white font-bold">{fii.C_digodo_fundo}</h2>  
-              <p className="text-[#01E59B] font-medium text-2xl">{fii.Rentab_Periodo}%</p>
+                <h2 className="text-white font-bold">{fii.C_digodo_fundo}</h2>
+                <p className="text-[#01E59B] font-medium text-2xl">{fii.Rentab_Periodo}%</p>
               </div>
-
               <div className="">
-                <p className="text-[#01E59B] font-medium">{fii.Rentab_Periodo}</p>
-           
-              </div> 
+                <p className="text-[#01E59B] font-medium">{formatarNumeroBRL(fii.Preco_Atual)}</p>
+              </div>
+            </div>
+            <div className="pt-3">
+              <p className="text-[#A4A4A4] uppercase">{fii.Setor}</p>
+            </div>
           </div>
-
-          <div className="pt-3">
-            <p className= "text-[#A4A4A4] uppercase">{fii.Setor}</p>
-          </div>
-        
-          </div>
+        </SwiperSlide>
       ))}
+    </Swiper>
       
     </div>
   );

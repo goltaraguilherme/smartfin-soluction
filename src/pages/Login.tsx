@@ -34,7 +34,9 @@ export default function Login() {
       <div className="col-lg-6 bg-[#13141B] h-[100vh]">
         <div className="container">
           <div className={styles.centralizar}>
-            <img className="pt-10" src="../../public/logo.png" alt="" />
+            <div className="flex justify-center">
+               <img className="pt-10" src="../../public/logo.png" alt="" />
+            </div>
           </div>
         </div>
       </div>

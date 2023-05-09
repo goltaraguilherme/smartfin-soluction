@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react'
 import { CardMenu } from "../components/Dashboard/CardMenu";
 import { Header } from "../components/Header";
 import Fii from "../components/RendaVariavel/Fii";
+import Modal from '../components/Modal';
 
 export type FiiData = {
   id: number;
@@ -32,10 +33,12 @@ export type FiiData = {
   VacanciaFisica: number;
   VacanciaFinanceira: number;
   QuantidadeAtivos: number;
+  slug: string;
 };
 
 export default function RendaVariavel() {
 
+  
   const [fiiData, setFiiData] = useState<FiiData[]>([]);
 
   useEffect(() => {
@@ -55,8 +58,11 @@ export default function RendaVariavel() {
   }, []);
 
 
+
+
+
   return (
-    <div className="h-[140vh] bg-[#13141B]">
+    <div className="h-[150vh] bg-[#13141B]">
       <Header />
 
       <div className="m-16 rounded p-16 bg-[#201F25]">
@@ -67,11 +73,11 @@ export default function RendaVariavel() {
           <h1 className="text-white text-3xl font-bold mb-3">Renda Variável</h1>  
         </div>
 
-        <div>
-          <button className='bg-[#2D9BFC] text-white p-2 font-semibold' style={{borderRadius: '10px' }}>Filtro</button>
-        </div>
 
         </div>
+
+
+
 
 
         <div className="row">
@@ -88,7 +94,12 @@ export default function RendaVariavel() {
 
         </div>
 
+
+
       </div>
     </div>
+
+
+
   );
 }

@@ -7,6 +7,7 @@ import { CardGanhos } from "../components/Dashboard/CardGanhos";
 import { CardVisaoGeral } from "../components/Dashboard/CardVisaoGeral";
 import { CardNoticias } from "../components/Dashboard/CardNoticias";
 
+
 export type FiiData = {
   id: number;
   C_digodo_fundo: string;
@@ -35,6 +36,7 @@ export type FiiData = {
   VacanciaFisica: number;
   VacanciaFinanceira: number;
   QuantidadeAtivos: number;
+  slug: string;
 };
 
 export default function Dashboard() {

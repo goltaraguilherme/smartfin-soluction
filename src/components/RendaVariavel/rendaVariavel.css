@@ -1,0 +1,31 @@
+.pagination {
+  background-color: transparent;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.page-item {
+  color: #fff;
+  padding: 2px;
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.page-link {
+  color: #fff;
+  background: transparent;
+  border-radius: 10px;
+  -webkit-border-radius: 10px;
+  -moz-border-radius: 10px;
+  -ms-border-radius: 10px;
+  -o-border-radius: 10px;
+  -webkit-border-radius: 10px;
+}
+
+.page-link:active {
+  background: #2D9BFC !important;
+}
