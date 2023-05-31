@@ -8,6 +8,8 @@ import Carteira from "./pages/Carteira";
 import Dashboard from "./pages/Dashboard";
 import Login from "./pages/Login";
 import RendaVariavel, { FiiData } from "./pages/RendaVariavel";
+import GanhoAcoes from "./pages/GanhoAcoes";
+import MelhoresFiis from "./pages/MelhoresFIIS";
 
 export function Router() {
 
@@ -39,7 +41,9 @@ export function Router() {
         <Route path="/cadastro" element={<Cadastro /> } />
         <Route path="/dashboard" element={<Dashboard/>} />
         <Route path="/carteira" element={<Carteira />}/>
-        <Route path="/renda-variavel" element={<RendaVariavel />} />
+        <Route path="/ganho-acoes" element={<GanhoAcoes />} />
+        <Route path="/fiis" element={<RendaVariavel />} />
+        <Route path="/fiis/melhoresfiis" element={<MelhoresFiis />} />
         <Route path="/fii/:id" element={<FiiDetalhes fiiData={fiiData}/>} />
     </Routes>
   );

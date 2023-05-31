@@ -1,3 +1,4 @@
+import { Link } from "react-router-dom";
 
 
 export const Header = () => {
@@ -5,7 +6,9 @@ export const Header = () => {
     <header className="bg-transparent flex justify-between items-center px-4 w-100 py-4">
     <div className='container pt-1 flex justify-between'>
       <div className="logo">
-          <img className="img-fluid" src="../../../public/smartfinSoluction.png"/>
+          <Link to="/dashboard">
+            <img className="img-fluid" src="../../../public/smartfinSoluction.png"/>
+          </Link>
       </div>
 
       <div> 

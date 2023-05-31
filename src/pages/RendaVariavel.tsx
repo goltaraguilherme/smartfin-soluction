@@ -62,17 +62,24 @@ export default function RendaVariavel() {
 
 
   return (
-    <div className="h-[150vh] bg-[#13141B]">
+    <div className="h-[170vh] bg-[#13141B]">
       <Header />
 
       <div className="m-16 rounded p-16 bg-[#201F25]">
 
-        <div className="flex justify-between">
+        <div className="flex justify-between align-center py-3">
 
-        <div>
+          <div>
           <h1 className="text-white text-3xl font-bold mb-3">Renda Variável</h1>  
-        </div>
 
+          </div>
+       
+          <div>
+          <button className="bg-blue-500 p-[10px] text-white font-semibold rounded">
+                Filtrar melhores FIIS
+            </button> 
+          </div>
+  
 
         </div>
 
