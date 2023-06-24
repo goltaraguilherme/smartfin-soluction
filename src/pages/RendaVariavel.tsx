@@ -47,7 +47,6 @@ export default function RendaVariavel() {
         const response = await axios.get(
           "https://x8ki-letl-twmt.n7.xano.io/api:R98tRgF0:v1/dados_fiis"
         );
-        console.log(response.data)
         setFiiData(response.data);
       } catch (error) {
         console.log(error);
@@ -70,7 +69,7 @@ export default function RendaVariavel() {
         <div className="flex justify-between align-center py-3">
 
           <div>
-          <h1 className="text-white text-3xl font-bold mb-3">Renda Variável</h1>  
+          <h1 className="text-white text-3xl font-bold mb-3">FIIS</h1>  
 
           </div>
        
