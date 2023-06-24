@@ -4,6 +4,7 @@ import { AiOutlineBell } from 'react-icons/ai';
 import { RiArrowDownSLine } from 'react-icons/ri';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import styles from './Dashboard/Header.module.css';
+import Cookies from 'js-cookie';
 
 export const Header = () => {
   
@@ -29,7 +30,7 @@ export const Header = () => {
 
   const handleLogout = () => {
  
-    localStorage.removeItem('token');
+  Cookies.remove("token");
     // Redireciona para a página de login (ou outra rota desejada)
     navigate('/');
   };
