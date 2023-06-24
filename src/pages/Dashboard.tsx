@@ -42,7 +42,6 @@ export default function Dashboard() {
   const [fiiData, setFiiData] = useState<FiiData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-
   const storedFilterData = localStorage.getItem("filterData");
   const initialFilterData = storedFilterData
     ? JSON.parse(storedFilterData)

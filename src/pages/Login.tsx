@@ -3,6 +3,7 @@ import { Link, useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import styles from '../login.module.css';
 import axios from 'axios';
+import Cookies from "js-cookie";
 
 interface User {
   email: string;
@@ -33,7 +34,8 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
       .then(response => {
         const token = response.data.token;
         if (token) {
-          localStorage.setItem('token', token); // Armazena o token no localStorage
+          localStorage.setItem('token', token); // Armazena o token no localStorage    
+          Cookies.set('token', token);
           handleLogin();
         } else {
           setError('Credenciais inválidas!');
