@@ -34,7 +34,6 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
       .then(response => {
         const token = response.data.token;
         if (token) {
-          localStorage.setItem('token', token); // Armazena o token no localStorage    
           Cookies.set('token', token);
           handleLogin();
         } else {
