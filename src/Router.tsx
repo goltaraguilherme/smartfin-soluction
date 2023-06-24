@@ -1,6 +1,8 @@
 import { Fragment, useEffect, useState } from "react";
 import { Route, Routes, useNavigate } from "react-router-dom";
 import axios from "axios";
+import Cookies from "js-cookie";
+
 import Fii from "./components/RendaVariavel/Fii";
 import FiiDetalhes from "./components/RendaVariavel/FiiDetalhes";
 import Cadastro from "./pages/Cadastro";
@@ -36,6 +38,13 @@ export function Router() {
     fetchData();
   }, []);
 
+  useEffect(() => {
+    const token = Cookies.get("token");
+    if (token) {
+      setIsLoggedIn(true);
+    }
+  }, []);
+
   const handleLogin = () => {
     setIsLoggedIn(true);
     navigate("/dashboard");
@@ -43,13 +52,18 @@ export function Router() {
 
   return (
     <Routes>
-      <Route path="/" element={<Login handleLogin={handleLogin} isLoggedIn={isLoggedIn} />} />
+      <Route
+        path="/"
+        element={
+          isLoggedIn ? (
+            <Dashboard />
+          ) : (
+            <Login handleLogin={handleLogin} isLoggedIn={isLoggedIn} />
+          )
+        }
+      />
       <Route path="/cadastro" element={<Cadastro />} />
-      {isLoggedIn ? (
-        <Route path="/dashboard" element={<Dashboard />} />
-      ) : (
-        <Route path="/dashboard" element={<Login handleLogin={handleLogin} isLoggedIn={isLoggedIn} />} />
-      )}
+      <Route path="/dashboard" element={<Dashboard />} />
       <Route path="/carteira" element={<Carteira />} />
       <Route path="/ganho-acoes" element={<GanhoAcoes />} />
       <Route path="/fiis" element={<RendaVariavel />} />
