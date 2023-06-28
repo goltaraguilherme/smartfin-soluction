@@ -12,33 +12,13 @@ export const CardMenu = () => {
       </svg>
 
       <button className="btn btn-secondary border-0 btn-xss dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false">
-      PR
+      Notificações
     </button>
     <ul className="dropdown-menu">
       ...
     </ul>
     
     </div>
-
-    <div className="flex items-center text-white">
-    <div className="flex flex-col items-end">
-        <p className="font-bold text-right">
-          Mateus
-          <br />
-          <span className="font-light text-[#717171]">Oliveira</span>
-        </p>
-    </div>
-
-    <div className="pl-3">
-      <img src="../../../public/avatar.png" alt="" />
-    </div>
-
-    <div>
-
-    </div>
-
-    </div>
-
 
      </div>
 
@@ -62,7 +42,7 @@ export const CardMenu = () => {
           <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" fill="currentColor" className="bi bi-wallet2 mr-3" viewBox="0 0 16 16">
           <path d="M12.136.326A1.5 1.5 0 0 1 14 1.78V3h.5A1.5 1.5 0 0 1 16 4.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 13.5v-9a1.5 1.5 0 0 1 1.432-1.499L12.136.326zM5.562 3H13V1.78a.5.5 0 0 0-.621-.484L5.562 3zM1.5 4a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5h-13z"/>
           </svg>
-          Ação Sel.
+          Carteira
           </button>
         </NavLink>
  

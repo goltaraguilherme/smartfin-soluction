@@ -1,11 +1,13 @@
-import { useState } from "react";
+import { useContext, useState } from "react";
 import { Link, useNavigate } from "react-router-dom";
 import { Header } from "../components/Header";
 import styles from '../login.module.css';
 import axios from 'axios';
 import Cookies from "js-cookie";
+import { UserContext } from "../context/UserContext";
 
 interface User {
+  name: string;
   email: string;
   password: string;
 }
@@ -17,6 +19,7 @@ interface LoginProps {
 
 export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
   const navigate = useNavigate();
+  const { setUser } = useContext(UserContext); // Obter a função de atualização do contexto de usuário
 
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -30,12 +33,35 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
       return;
     }
 
-    axios.post('http://localhost:8081/login', { email, password })
+    axios.post('https://smartfinsoluction-backend.vercel.app/login', { email, password })
       .then(response => {
         const token = response.data.token;
         if (token) {
           Cookies.set('token', token);
-          handleLogin();
+
+          axios.get(`https://smartfinsoluction-backend.vercel.app/user/${token}`)
+          .then(response => {
+            const userData: User = {
+              name: response.data.name,
+              email: response.data.email,
+              password: response.data.password // Certifique-se de que você não está armazenando a senha em plain text
+            };
+
+            // Armazenar userData no cookie
+            Cookies.set('userData', JSON.stringify(userData));
+  
+            // Atualizar o contexto de usuário com os dados reais do usuário
+            setUser(userData);
+
+            console.log(userData)
+  
+            handleLogin();
+          })
+          .catch(error => {
+            console.error(error);
+            // Lógica de tratamento de erro
+          });
+
         } else {
           setError('Credenciais inválidas!');
         }
@@ -55,7 +81,7 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
               <div className="container">
                 <div className={styles.centralizar}>
                   <div className="flex justify-center">
-                    <img className="pt-10" src="../../public/logo.png" alt="" />
+                    <img className="pt-10" src="/logo.png" alt="" />
                   </div>
                 </div>
               </div>

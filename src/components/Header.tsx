@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { AiOutlineBell } from 'react-icons/ai';
 import { RiArrowDownSLine } from 'react-icons/ri';
@@ -13,10 +13,21 @@ export const Header = () => {
   const [notificationsOpen, setNotificationsOpen] = useState(false);
   const [userDropdownOpen, setUserDropdownOpen] = useState(false);
   const [isOpen, setIsOpen] = useState(false);
+  const [userName, setUserName] = useState('');
+
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
+
+  useEffect(() => {
+    // Obtém o valor do cookie 'userData'
+    const userDataString = Cookies.get('userData');
+    if (userDataString) {
+      const userData = JSON.parse(userDataString);
+      setUserName(userData.name);
+    }
+  }, []);
 
   const toggleNotifications = () => {
     setNotificationsOpen(!notificationsOpen);
@@ -31,8 +42,11 @@ export const Header = () => {
   const handleLogout = () => {
  
   Cookies.remove("token");
+  Cookies.remove('userData');
     // Redireciona para a página de login (ou outra rota desejada)
-    navigate('/');
+    navigate('/')
+    window.location.reload();
+
   };
 
   return (
@@ -70,7 +84,7 @@ export const Header = () => {
                   className="text-white flex items-center  text-[16px] focus:outline-none"
                   onClick={toggleUserDropdown}
                 >
-                  Igor <RiArrowDownSLine className="text-[18px]" />
+                  {userName} <RiArrowDownSLine className="text-[18px]" />
                 </button>
 
                 {userDropdownOpen && (

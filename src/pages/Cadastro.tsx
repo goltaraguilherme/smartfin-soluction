@@ -29,7 +29,7 @@ export default function Cadastro() {
   
 
     // Verificar se o usuário já existe
-    axios.get<User[]>('http://localhost:8081/users/all')
+    axios.get<User[]>('https://smartfinsoluction-backend.onrender.com/users/all')
       .then(response => {
         const users = response.data;
         const existingUser = users.find(user => user.email === email);
@@ -43,7 +43,7 @@ export default function Cadastro() {
             password: password
           };
 
-          axios.post('http://localhost:8081/signup', newUser)
+          axios.post('https://smartfinsoluction-backend.vercel.app/signup', newUser)
             .then(response => {
               console.log(response.data); // Exibe a resposta do servidor
               setShowSuccessMessage(true); // Mostra o aviso de sucesso
@@ -71,7 +71,7 @@ export default function Cadastro() {
             <div className="col-lg-6 bg-[#13141B] h-[100vh]">
               <div className="container">
                 <div className=' h-100 pt-[50%]'>
-                  <img className='w-80' src="/public/smartfinSoluction.png" alt="" />
+                  <img className='w-80' src="/smartfinSoluction.png" alt="" />
                   <h1 className='pt-5 text-[30px]'>Cadastre-se já</h1>
                 </div>
               </div>

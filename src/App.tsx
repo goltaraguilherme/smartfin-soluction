@@ -1,18 +1,22 @@
-import { useState } from 'react'
-import { BrowserRouter } from 'react-router-dom'
-import reactLogo from './assets/react.svg'
-import { Header } from './components/Header'
-import { Router } from './Router'
+import { BrowserRouter } from 'react-router-dom';
 
+import { Router } from './Router';
+import { AuthProvider } from './context/AuthContext';
+import { RouteProvider } from './context/RouteContext';
+import { UserProvider } from './context/UserContext';
 
 function App() {
-
   return (
-      <BrowserRouter>
-        <Router />
-      </BrowserRouter>
-
-  )
+    <BrowserRouter>
+      <AuthProvider>
+        <UserProvider>
+        <RouteProvider>
+          <Router />
+        </RouteProvider>
+        </UserProvider>
+      </AuthProvider>
+    </BrowserRouter>
+  );
 }
 
-export default App
+export default App;

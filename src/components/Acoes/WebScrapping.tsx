@@ -72,6 +72,8 @@ export default function WebScrappingAcoes() {
       }
     };
 
+
+    console.log(fetchScrapingData)
     fetchScrapingData();
   }, [slug]);
 
