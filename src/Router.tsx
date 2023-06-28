@@ -80,6 +80,8 @@ export function Router() {
               <Login handleLogin={handleLogin} isLoggedIn={isLoggedIn} />
             }
           />
+
+          
           <Route path="/cadastro" element={<Cadastro />} />
 
       {isLoggedIn && (
