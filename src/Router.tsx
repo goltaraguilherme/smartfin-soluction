@@ -62,39 +62,28 @@ export function Router() {
     navigate('/dashboard');
   };
 
-  const renderProtectedRoute = (path: string, element: JSX.Element) => {
-    if (isLoggedIn) {
-      return element;
-    } else {
-      navigate('/');
-      return null;
-    }
-  };
-
   return (
     <Routes>
-
-    <Route
-            path="/"
-            element={
-              <Login handleLogin={handleLogin} isLoggedIn={isLoggedIn} />
-            }
-          />
-
-          
+      {!isLoggedIn && (
+        <>
+          <Route path="/" element={<Login handleLogin={handleLogin} isLoggedIn={isLoggedIn} />} />
           <Route path="/cadastro" element={<Cadastro />} />
+        </>
+      )}
 
       {isLoggedIn && (
-        <Route path="/dashboard" element={<Dashboard />} />
+        <>
+          <Route path="/dashboard" element={<Dashboard />} />
+          <Route path="/carteira" element={<Carteira />} />
+          <Route path="/ganho-acoes" element={<GanhoAcoes />} />
+          <Route path="/fiis" element={<RendaVariavel />} />
+          <Route path="/fiis/melhoresfiis" element={<MelhoresFiis />} />
+          <Route path="/acoes" element={<Acoes />} />
+          <Route path="/acoes/:slug" element={<AcoesDetalhes />} />
+          <Route path="/fiis/:id" element={<FiiDetalhes fiiData={fiiData} />} />
+          <Route path="/alertas" element={<Alertas />} />
+        </>
       )}
-      <Route path="/carteira" element={renderProtectedRoute('/carteira', <Carteira />)} />
-      <Route path="/ganho-acoes" element={renderProtectedRoute('/ganho-acoes', <GanhoAcoes />)} />
-      <Route path="/fiis" element={renderProtectedRoute('/fiis', <RendaVariavel />)} />
-      <Route path="/fiis/melhoresfiis" element={renderProtectedRoute('/fiis/melhoresfiis', <MelhoresFiis />)} />
-      <Route path="/acoes" element={renderProtectedRoute('/acoes', <Acoes />)} />
-      <Route path="/acoes/:slug" element={<AcoesDetalhes />} />
-      <Route path="/fiis/:id" element={renderProtectedRoute('/fiis/:id', <FiiDetalhes fiiData={fiiData} />)} />
-      <Route path="/alertas" element={renderProtectedRoute('/alertas', <Alertas />)} />
     </Routes>
   );
 }
