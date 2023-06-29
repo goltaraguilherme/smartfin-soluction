@@ -33,7 +33,7 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
       return;
     }
   
-    axios.post('https://smartfinsoluction-backend/auth/login', { email, password })
+    axios.post('https://smartfinsoluction-backend.vercel.app/auth/login', { email, password })
       .then(response => {
         const token = response.data.token.token;
         const name = response.data.token.name;
