@@ -29,7 +29,7 @@ export default function Cadastro() {
   
 
     // Verificar se o usuário já existe
-    axios.get<User[]>('http://localhost:8081/users/all')
+    axios.get<User[]>('hhttps://smartfinsoluction-backend.vercel.app/users/all')
       .then(response => {
         const users = response.data;
         const existingUser = users.find(user => user.email === email);
@@ -43,7 +43,7 @@ export default function Cadastro() {
             password: password
           };
 
-          axios.post('http://localhost:8081/signup', newUser)
+          axios.post('https://smartfinsoluction-backend.vercel.app/signup', newUser)
             .then(response => {
               console.log(response.data); // Exibe a resposta do servidor
               setShowSuccessMessage(true); // Mostra o aviso de sucesso
