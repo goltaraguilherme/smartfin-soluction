@@ -9,7 +9,7 @@ import { UserContext } from "../context/UserContext";
 interface User {
   name: string;
   email: string;
-  password: string
+  password: string;
 }
 
 interface LoginProps {
@@ -27,37 +27,35 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-  
+
     if (!email || !password) {
       setError('Preencha todos os campos!');
       return;
     }
-  
-    axios.post('https://smartfinsoluction-backend.vercel.app/auth/login', { email, password })
+
+    axios.post('http://localhost:8081/login', { email, password })
       .then(response => {
-        const token = response.data.token.token;
-        const name = response.data.token.name;
-        const email = response.data.email;
+        const { token } = response.data;
+        
         if (token) {
           Cookies.set('token', token);
-          Cookies.set('name', name);
-          Cookies.set('email', email);
-  
-              navigate('/dashboard');
-  
-              handleLogin();
-            }
-
+          
+          navigate('/dashboard');
+          handleLogin()
+          // Lógica adicional, se necessário
+        } else {
+          setError('Falha no login. Verifique suas credenciais.');
+        }
       })
       .catch(error => {
         console.error(error);
         // Lógica de tratamento de erro
       });
-  };
-  
-
-  return (
-    <>
+    };
+    
+    
+    return (
+      <>
       <main className="w-[100%] text-white">
         <div className="container-fluid">
           <div className="row">
@@ -109,12 +107,8 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
                     </form>
 
                     <div className="pt-4">
-
-                      <p>Ainda não tem uma conta? <Link className="text-blue-500" to={'/cadastro'}>Registre-se</Link>
-                      </p>
-
+                      <p>Ainda não tem uma conta? <Link className="text-blue-500" to={'/cadastro'}>Registre-se</Link></p>
                     </div>
-
                   </div>
                 </div>
               </div>
