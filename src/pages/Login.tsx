@@ -9,7 +9,7 @@ import { UserContext } from "../context/UserContext";
 interface User {
   name: string;
   email: string;
-  password: string;
+  password: string
 }
 
 interface LoginProps {
@@ -27,50 +27,34 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-
+  
     if (!email || !password) {
       setError('Preencha todos os campos!');
       return;
     }
-
-    axios.post('https://smartfinsoluction-backend.vercel.app/login', { email, password })
+  
+    axios.post('https://smartfinsoluction-backend/auth/login', { email, password })
       .then(response => {
-        const token = response.data.token;
+        const token = response.data.token.token;
+        const name = response.data.token.name;
+        const email = response.data.email;
         if (token) {
           Cookies.set('token', token);
-
-          axios.get(`https://smartfinsoluction-backend.vercel.app/user/${token}`)
-          .then(response => {
-            const userData: User = {
-              name: response.data.name,
-              email: response.data.email,
-              password: response.data.password // Certifique-se de que você não está armazenando a senha em plain text
-            };
-
-            // Armazenar userData no cookie
-            Cookies.set('userData', JSON.stringify(userData));
+          Cookies.set('name', name);
+          Cookies.set('email', email);
   
-            // Atualizar o contexto de usuário com os dados reais do usuário
-            setUser(userData);
-
-            console.log(userData)
+              navigate('/dashboard');
   
-            handleLogin();
-          })
-          .catch(error => {
-            console.error(error);
-            // Lógica de tratamento de erro
-          });
+              handleLogin();
+            }
 
-        } else {
-          setError('Credenciais inválidas!');
-        }
       })
       .catch(error => {
         console.error(error);
         // Lógica de tratamento de erro
       });
-  }
+  };
+  
 
   return (
     <>

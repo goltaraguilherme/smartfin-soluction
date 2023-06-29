@@ -21,11 +21,10 @@ export const Header = () => {
   };
 
   useEffect(() => {
-    // Obtém o valor do cookie 'userData'
-    const userDataString = Cookies.get('userData');
-    if (userDataString) {
-      const userData = JSON.parse(userDataString);
-      setUserName(userData.name);
+    // Obtém o valor do cookie 'name'
+    const name = Cookies.get('name');
+    if (name) {
+      setUserName(name);
     }
   }, []);
 
