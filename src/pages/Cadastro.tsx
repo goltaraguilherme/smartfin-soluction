@@ -29,7 +29,7 @@ export default function Cadastro() {
   
 
     // Verificar se o usuário já existe
-    axios.get<User[]>('hhttps://smartfinsoluction-backend.vercel.app/users/all')
+    axios.get<User[]>('https://smartfinsoluction-backend.vercel.app/users/all')
       .then(response => {
         const users = response.data;
         const existingUser = users.find(user => user.email === email);
