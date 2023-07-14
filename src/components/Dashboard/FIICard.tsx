@@ -4,7 +4,7 @@ import { ApexOptions } from "apexcharts";
 import SwiperCore, { Pagination, Navigation, Autoplay } from 'swiper';
 import 'swiper/swiper-bundle.css';
 import { Swiper, SwiperSlide } from 'swiper/react';
-import { useState } from "react";
+import { useRef, useState } from "react";
 
 
 type FiiCardsProps = {
@@ -18,17 +18,49 @@ function formatarNumeroBRL(numero: number): string {
 function FiiCards(props: FiiCardsProps) {
   const { fiiData } = props;
 
+  const swiperRef = useRef<SwiperCore>(null);
+  const [swiperInstance, setSwiperInstance] = useState<SwiperCore | null>(null);
 
   SwiperCore.use([Autoplay, Navigation, Pagination]);
 
+  const swiperOptions = {
+    slidesPerView: 4,
+    spaceBetween: 10,
+    loop: true,
+    autoplay: {
+      delay: 2000,
+      disableOnInteraction: false,
+    },
+    onSwiper: (swiper: SwiperCore) => {
+      setSwiperInstance(swiper);
+    },
+  };
+
+  const handleMouseEnter = () => {
+    if (swiperInstance) {
+      swiperInstance.autoplay.stop();
+    }
+  };
+
+  const handleMouseLeave = () => {
+    if (swiperInstance) {
+      swiperInstance.autoplay.start();
+    }
+  };
 
   return (
-    <div className="flex column-xs border border-gray rounded p-4 ">
+    <div 
+    className="flex column-xs border border-gray rounded p-4 "
+    onMouseEnter={handleMouseEnter}
+    onMouseLeave={handleMouseLeave}
+    >
    
    <Swiper
+      {...swiperOptions}
+      
       slidesPerView={4}
       spaceBetween={10}
-
+ 
       loop={true}
       autoplay={{delay: 2000}}
       className="mySwiper"

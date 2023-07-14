@@ -35,13 +35,36 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
 
     axios.post('https://smartfinsoluction-backend.vercel.app/login', { email, password })
       .then(response => {
+        console.log(response.data);
         const { token } = response.data;
-        
+
         if (token) {
           Cookies.set('token', token);
+
+          axios.get(`https://smartfinsoluction-backend.vercel.app/user/${token}`, {
+          })
+            .then(userResponse => {
+              console.log(userResponse.data); // Verifique se os dados do usuário estão sendo recebidos corretamente
           
+              const { name, email } = userResponse.data; // Acesse o primeiro objeto do array
+          
+              Cookies.set('name', name);
+              Cookies.set('email', email);
+          
+              // Faça o que for necessário com os dados do usuário (name, email, password)
+              // Por exemplo, você pode armazenar os dados no contexto do usuário
+              setUser({ name, email });
+          
+              navigate('/dashboard');
+              handleLogin();
+            })
+            .catch(userError => {
+              console.error(userError);
+              // Lógica de tratamento de erro da consulta do usuário
+            });
+
           navigate('/dashboard');
-          handleLogin()
+          handleLogin();
           // Lógica adicional, se necessário
         } else {
           setError('Falha no login. Verifique suas credenciais.');
@@ -51,7 +74,7 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
         console.error(error);
         // Lógica de tratamento de erro
       });
-    };
+  };
     
     
     return (

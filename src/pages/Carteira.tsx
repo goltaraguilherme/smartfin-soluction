@@ -36,6 +36,8 @@ export default function Carteira() {
   const [successAlert, setSuccessAlert] = useState(false);
   const [errorAlert, setErrorAlert] = useState(false);
   const [ativos, setAtivos] = useState<AtivoData[]>([]);
+  const [stockPrice, setStockPrice] = useState<number | null>(null);
+
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -51,7 +53,7 @@ export default function Carteira() {
     try {
       const token = Cookies.get('token');
       const response = await axios.post(
-        `https://smartfinsoluction-backend.vercel.app/${token}/ativo`,
+        `https://smartfinsoluction-backend.vercel.app/user/${token}/ativo`,
         {
           nomeAtivo,
           quantidadeAtivos,
@@ -98,6 +100,9 @@ export default function Carteira() {
         `https://brapi.dev/api/quote/list?search=${nomeAtivo}`
       );
       setSugestoesAtivos(response.data.stocks);
+      if (response.data.stocks.length > 0) {
+        setStockPrice(response.data.stocks[0].close);
+      }
     } catch (error) {
       console.log(error);
     }
@@ -229,6 +234,15 @@ export default function Carteira() {
                   </ul>
                 </div>
               )}
+
+
+
+              <div className="mb-4">
+              {stockPrice !== null && (
+                <p className="text-gray-400 mt-2">Preço da Ação: {stockPrice}</p>
+              )}
+              </div>
+
               <div className="mb-4">
                 <label htmlFor="quantidade-ativos" className="block text-gray-700">
                   Quantidade de Ativos
@@ -242,6 +256,10 @@ export default function Carteira() {
                   required
                 />
               </div>
+
+
+
+
               <div className="mb-4">
                 <label htmlFor="valor-compra-ativo" className="block text-gray-700">
                   Valor de Compra do Ativo

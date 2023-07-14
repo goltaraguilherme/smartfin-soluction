@@ -6,6 +6,7 @@ import { CardMenu } from "../components/Dashboard/CardMenu";
 import { CardGanhos } from "../components/Dashboard/CardGanhos";
 import { CardVisaoGeral } from "../components/Dashboard/CardVisaoGeral";
 import { CardNoticias } from "../components/Dashboard/CardNoticias";
+import Cookies from "js-cookie";
 
 export type FiiData = {
   id: number;
@@ -52,6 +53,16 @@ export default function Dashboard() {
         vacanciaFinanceira: "",
       };
   const [filterData, setFilterData] = useState(initialFilterData);
+  const [userName, setUserName] = useState('');
+
+
+  useEffect(() => {
+    // Obtém o valor do cookie 'name'
+    const name = Cookies.get('name');
+    if (name) {
+      setUserName(name);
+    }
+  }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -59,7 +70,6 @@ export default function Dashboard() {
         const response = await axios.get(
           "https://x8ki-letl-twmt.n7.xano.io/api:R98tRgF0:v1/dados_fiis"
         );
-        console.log(response.data)
         setFiiData(response.data);
       } catch (error) {
         console.log(error);
@@ -111,7 +121,7 @@ export default function Dashboard() {
 
             <div className="row">
               <div className="col-lg-6">
-                <h1 className="text-white mb-3 text-3xl text-left font-bold">Dashboard</h1>
+                <h1 className="text-white mb-3 text-3xl text-left font-bold">Olá, {userName}</h1>
               </div>
 
               <div className="col-lg-6">

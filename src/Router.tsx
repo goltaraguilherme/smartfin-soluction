@@ -21,7 +21,7 @@ import Alertas from './pages/Alertas';
 import { UserContext, UserProvider } from './context/UserContext';
 
 export function Router() {
-  console.log('Router component rendered'); // Verificação do render
+
 
   const navigate = useNavigate();
   const { isLoggedIn, login, logout } = useAuth();

@@ -41,7 +41,8 @@ export const Header = () => {
   const handleLogout = () => {
  
   Cookies.remove("token");
-  Cookies.remove('userData');
+  Cookies.remove('name');
+  Cookies.remove('email');
     // Redireciona para a página de login (ou outra rota desejada)
     navigate('/')
     window.location.reload();
