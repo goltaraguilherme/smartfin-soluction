@@ -28,7 +28,7 @@ export const UserProvider = ({ children }: UserProviderProps) => {
     if (token) {
       // Obter os dados do usuário com base no token
       axios
-        .get(`https://smartfinsoluction-backend.vercel.app/users/${token}`)
+        .get(`https://smartfinsoluction-backend.vercel.app/user/${token}`)
         .then((response) => {
           const userData = response.data;
           setUser(userData); // Atualizar os dados do usuário no estado do contexto
