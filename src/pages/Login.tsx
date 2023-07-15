@@ -33,12 +33,14 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
       return;
     }
 
+    console.log("Enviando solicitação de login...");
     axios.post('https://smartfinsoluction-backend.vercel.app/login', { email, password })
       .then(response => {
-        console.log(response.data);
+        console.log("Resposta da solicitação de login:", response.data);
         const { token } = response.data;
 
         if (token) {
+          console.log("Token recebido:", token);
           const expiresInHours = 1;
           const expirationDate = new Date();
           expirationDate.setTime(expirationDate.getTime() + expiresInHours * 60 * 60 * 1000);
@@ -49,30 +51,33 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
             sameSite: 'strict'
           });
 
+          console.log("Enviando solicitação para obter informações do usuário...");
           axios.get(`https://smartfinsoluction-backend.vercel.app/user/${token}`)
             .then(userResponse => {
-              console.log(userResponse.data);
+              console.log("Resposta da solicitação de informações do usuário:", userResponse.data);
               const { name, email } = userResponse.data;
               Cookies.set('name', name);
               Cookies.set('email', email);
               setUser({ name, email });
-              navigate('/dashboard');
-              handleLogin();
+
+              // Verificar se os dados do usuário são válidos
+              if (name && email) {
+                navigate('/dashboard');
+                handleLogin();
+              } else {
+                setError('Dados de usuário inválidos.');
+              }
             })
             .catch(userError => {
-              console.error(userError);
+              console.error("Erro ao obter informações do usuário:", userError);
               // Lógica de tratamento de erro da consulta do usuário
             });
-
-          navigate('/dashboard');
-          handleLogin();
-          // Lógica adicional, se necessário
         } else {
           setError('Falha no login. Verifique suas credenciais.');
         }
       })
       .catch(error => {
-        console.error(error);
+        console.error("Erro ao fazer login:", error);
         // Lógica de tratamento de erro
       });
   };
@@ -80,6 +85,7 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
   useEffect(() => {
     const token = Cookies.get('token');
     if (token) {
+      console.log("Token encontrado nos cookies:", token);
       navigate('/dashboard');
     }
   }, []);

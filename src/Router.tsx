@@ -18,11 +18,9 @@ import MelhoresFiis from './pages/MelhoresFIIS';
 import Acoes from './pages/Acoes';
 import AcoesDetalhes from './pages/AcoesDetalhes';
 import Alertas from './pages/Alertas';
-import { UserContext, UserProvider } from './context/UserContext';
+import { UserProvider } from './context/UserContext';
 
 export function Router() {
-
-
   const navigate = useNavigate();
   const { isLoggedIn, login, logout } = useAuth();
   const { setCurrentRoute } = useRoute();
@@ -63,27 +61,29 @@ export function Router() {
   };
 
   return (
-    <Routes>
-      {!isLoggedIn && (
-        <>
-          <Route path="/" element={<Login handleLogin={handleLogin} isLoggedIn={isLoggedIn} />} />
-          <Route path="/cadastro" element={<Cadastro />} />
-        </>
-      )}
+    <UserProvider>
+      <Routes>
+        {!isLoggedIn && (
+          <>
+            <Route path="/" element={<Login handleLogin={handleLogin} isLoggedIn={isLoggedIn} />} />
+            <Route path="/cadastro" element={<Cadastro />} />
+          </>
+        )}
 
-      {isLoggedIn && (
-        <>
-          <Route path="/dashboard" element={<Dashboard />} />
-          <Route path="/carteira" element={<Carteira />} />
-          <Route path="/ganho-acoes" element={<GanhoAcoes />} />
-          <Route path="/fiis" element={<RendaVariavel />} />
-          <Route path="/fiis/melhoresfiis" element={<MelhoresFiis />} />
-          <Route path="/acoes" element={<Acoes />} />
-          <Route path="/acoes/:slug" element={<AcoesDetalhes />} />
-          <Route path="/fiis/:id" element={<FiiDetalhes fiiData={fiiData} />} />
-          <Route path="/alertas" element={<Alertas />} />
-        </>
-      )}
-    </Routes>
+        {isLoggedIn && (
+          <>
+            <Route path="/dashboard" element={<Dashboard />} />
+            <Route path="/carteira" element={<Carteira />} />
+            <Route path="/ganho-acoes" element={<GanhoAcoes />} />
+            <Route path="/fiis" element={<RendaVariavel />} />
+            <Route path="/fiis/melhoresfiis" element={<MelhoresFiis />} />
+            <Route path="/acoes" element={<Acoes />} />
+            <Route path="/acoes/:slug" element={<AcoesDetalhes />} />
+            <Route path="/fiis/:id" element={<FiiDetalhes fiiData={fiiData} />} />
+            <Route path="/alertas" element={<Alertas />} />
+          </>
+        )}
+      </Routes>
+    </UserProvider>
   );
 }
