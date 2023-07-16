@@ -1,10 +1,15 @@
-import { useState, useEffect } from 'react';
+import React, { useState, useEffect } from 'react';
 import axios from 'axios';
 import Cookies from 'js-cookie';
-import { CardPatrimonio } from '../components/Carteira/CardPatrimõnio';
-import { CardRentabilidade } from '../components/Carteira/CardRentabilidade';
+import { Link } from 'react-router-dom';
+
 import { CardMenu } from '../components/Dashboard/CardMenu';
 import { Header } from '../components/Header';
+import ReactApexChart from 'react-apexcharts';
+
+import { css } from '@emotion/react';
+import { ScaleLoader } from 'react-spinners';
+
 
 interface StockData {
   stock: string;
@@ -20,7 +25,14 @@ interface StockData {
 interface AtivoData {
   nomeAtivo: string;
   quantidadeAtivos: number;
-  valorAtivo: number;
+  valorAtivo: string;
+}
+
+interface RentabilidadeData {
+  stock: string;
+  valorCompra: number;
+  rentabilidadePorcentagem: number;
+  rentabilidadeValor: number;
 }
 
 interface StocksResponse {
@@ -31,13 +43,103 @@ export default function Carteira() {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [nomeAtivo, setNomeAtivo] = useState('');
   const [quantidadeAtivos, setQuantidadeAtivos] = useState(0);
-  const [valorAtivo, setValorAtivo] = useState(0);
+  const [valorAtivo, setValorAtivo] = useState('');
   const [sugestoesAtivos, setSugestoesAtivos] = useState<StockData[]>([]);
   const [successAlert, setSuccessAlert] = useState(false);
   const [errorAlert, setErrorAlert] = useState(false);
   const [ativos, setAtivos] = useState<AtivoData[]>([]);
   const [stockPrice, setStockPrice] = useState<number | null>(null);
+  const [patrimonioTotal, setPatrimonioTotal] = useState(0);
+  const [rentabilidade, setRentabilidade] = useState<RentabilidadeData[]>([]);
+  const [isLoading, setIsLoading] = useState(true);
 
+  useEffect(() => {
+    const calcularRentabilidade = async () => {
+      const rentabilidadeData: RentabilidadeData[] = [];
+
+      for (const ativo of ativos) {
+        const response = await axios.get<StocksResponse>(
+          `https://brapi.dev/api/quote/list?search=${ativo.nomeAtivo}`
+        );
+
+        const stockData = response.data.stocks.find(
+          (stock) => stock.stock === ativo.nomeAtivo
+        );
+
+        if (stockData) {
+          const valorCompra = parseFloat(ativo.valorAtivo);
+          const rentabilidadePorcentagem =
+            ((stockData.close - valorCompra) / valorCompra) * 100;
+          const rentabilidadeValor = stockData.close - valorCompra;
+
+          rentabilidadeData.push({
+            stock: ativo.nomeAtivo,
+            valorCompra,
+            rentabilidadePorcentagem,
+            rentabilidadeValor,
+          });
+        }
+      }
+
+      setRentabilidade(rentabilidadeData);
+    };
+
+    calcularRentabilidade();
+  }, [ativos]);
+
+  useEffect(() => {
+    const fetchAtivos = async () => {
+      try {
+        const token = Cookies.get('token');
+        const response = await axios.get(
+          `https://smartfinsoluction-backend.vercel.app/user/${token}/ativo`
+        );
+        setAtivos(response.data);
+        setIsModalOpen(false); // Fechar o popup
+      } catch (error) {
+        console.log(error);
+      } finally {
+        setIsLoading(false);
+      }
+    };
+
+    fetchAtivos();
+  }, []);
+
+  useEffect(() => {
+    const calcularPatrimonioTotal = () => {
+      let total = 0;
+      ativos.forEach((ativo) => {
+        const valorCompra = parseFloat(ativo.valorAtivo);
+        const quantidade = ativo.quantidadeAtivos;
+        total += valorCompra * quantidade;
+      });
+      setPatrimonioTotal(total);
+    };
+
+    calcularPatrimonioTotal();
+  }, [ativos]);
+
+  const options = {
+    labels: ativos.map((ativo) => ativo.nomeAtivo),
+  };
+
+  const series = ativos.map((ativo) => {
+    const valorCompra = parseFloat(ativo.valorAtivo);
+    const quantidade = ativo.quantidadeAtivos;
+    return valorCompra * quantidade;
+  });
+
+  const patrimonioTotalFormatted = new Intl.NumberFormat('pt-BR', {
+    style: 'currency',
+    currency: 'BRL',
+  }).format(patrimonioTotal);
+
+  // Calcular a rentabilidade total da carteira
+  const rentabilidadeTotal = rentabilidade.reduce(
+    (total, ativo) => total + ativo.rentabilidadePorcentagem,
+    0
+  );
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
@@ -45,6 +147,19 @@ export default function Carteira() {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+  };
+
+  const fetchAtivos = async () => {
+    try {
+      const token = Cookies.get('token');
+      const response = await axios.get(
+        `https://smartfinsoluction-backend.vercel.app/user/${token}/ativo`
+      );
+      setAtivos(response.data);
+      setIsModalOpen(false); // Fechar o popup
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleAddAtivo = async (event: React.FormEvent) => {
@@ -62,7 +177,10 @@ export default function Carteira() {
       );
 
       if (response.status === 200) {
-        setSuccessAlert(true);
+        handleCloseModal(); // Fechar o popup
+
+        // Buscar os ativos atualizados
+        fetchAtivos();
       } else {
         setErrorAlert(true);
       }
@@ -71,28 +189,6 @@ export default function Carteira() {
       setErrorAlert(true);
     }
   };
-
-
-  useEffect(() => {
-    const fetchAtivos = async () => {
-
-
-
-      try {
-        const token = Cookies.get('token');
-
-        const response = await axios.get(`https://smartfinsoluction-backend.vercel.app/user/${token}/ativo`);
-        setAtivos(response.data);
-        console.log(response.data)
-
-
-      } catch (error) {
-        console.log(error);
-      }
-    };
-  
-    fetchAtivos();
-  }, []);
 
   const fetchSugestoesAtivos = async (nomeAtivo: string) => {
     try {
@@ -114,7 +210,7 @@ export default function Carteira() {
     }
   }, [nomeAtivo]);
 
-    useEffect(() => {
+  useEffect(() => {
     let successTimer: NodeJS.Timeout | undefined;
     let errorTimer: NodeJS.Timeout | undefined;
 
@@ -136,67 +232,109 @@ export default function Carteira() {
     };
   }, [successAlert, errorAlert]);
 
-
   return (
-    <div className="h-[140vh] bg-[#13141B]">
+    <div className="h-[200vh] bg-[#13141B]">
       <Header />
 
-      <div className="m-16 rounded p-16 bg-[#201F25]">
-        <div className="container-fluid">
-          <div className="row">
-            <div className="col-lg-6">
-              <h1 className="text-white mb-3 text-3xl font-bold">Carteira</h1>
-            </div>
-            <div className="col-lg-6">
-              <div className="flex justify-end">
-                <button
-                  className="bg-blue-500 text-white p-2 rounded"
-                  onClick={handleOpenModal}
-                >
-                  Adicionar ativo
-                </button>
+      {isLoading ? (
+        <div className="h-screen flex items-center justify-center">
+        <ScaleLoader color="#fff" loading={isLoading} height={60} width={8} radius={4} />
+        </div>
+      ) : (
+        <div className="m-16 rounded p-16 bg-[#201F25]">
+          <div className="container-fluid">
+            <div className="row">
+              <div className="col-lg-6">
+                <h1 className="text-white mb-3 text-3xl font-bold">Carteira</h1>
+              </div>
+              <div className="col-lg-6">
+                <div className="flex justify-end">
+                  <button
+                    className="bg-blue-500 text-white p-2 rounded"
+                    onClick={handleOpenModal}
+                  >
+                    Adicionar ativo
+                  </button>
+                </div>
               </div>
             </div>
-          </div>
-          <div className="row">
-            <div className="col-lg-3">
-              <CardMenu />
-            </div>
-            <div className="col-lg-9">
-              <div className="row">
-                <div className="col-lg-6">
-                  <CardPatrimonio />
-                </div>
-                <div className="col-lg-6">
-                <div className="col-lg-12">
-              <div className='border border-gray rounded h-[40vh] w-100 mt-0 text-white p-4 overflow-y-auto'>
-                <h3 className='text-white text-2xl font-medium'>Meus Ativos</h3>
+            <div className="row">
+              <div className="col-lg-3">
+                <CardMenu />
+              </div>
+              <div className="col-lg-9">
+                <div className="row">
+                  <div className="col-lg-6">
+                    <div>
+                      <div className="border border-gray-300 rounded h-[70vh] mt-0 p-4 relative">
+                        <h2 className="text-white mb-3 text-2xl">Patrimônio</h2>
+                        <ReactApexChart
+                          options={options}
+                          series={series}
+                          type="pie"
+                          height={350}
+                        />
 
-                <div>
-
-                {ativos.map((ativo, index) => (
-                  <div key={index} className="mb-4">
-                    {/* Render a card component for each ativo */}
-                    <div className="bg-gray-800 p-4 rounded-md">
-                  <h4 className="text-white text-lg font-medium">{ativo.nomeAtivo}</h4>
-                  <p className="text-gray-300">Quantidade: {ativo.quantidadeAtivos}</p>
-                  <p className="text-gray-300">Valor: R$ {ativo.valorAtivo}</p>
-                </div>
-
+                        <p className="text-white text-xl mt-4">
+                          Patrimônio Total: {patrimonioTotalFormatted}
+                        </p>
+                        <p className="text-white text-xl mt-4">
+                          Rentabilidade Total: {rentabilidadeTotal.toFixed(2)}%
+                        </p>
+                      </div>
+                    </div>
                   </div>
-                ))}
-                </div>
-              </div>
-            </div>
-                </div>
-                <div className="col-lg-12">
-                  <CardRentabilidade />
+                  <div className="col-lg-6">
+                    <div className="border border-gray-300 rounded h-[70vh] mt-0 p-4 relative">
+                      <h3 className="text-white text-2xl font-medium py-2 px-4 mb-4 sticky top-0 z-10">
+                        Meus Ativos
+                      </h3>
+                      <div className="h-[calc(100%-5rem)] overflow-y-auto custom-scroll">
+                        {ativos.map((ativo, index) => (
+                          <div
+                            key={index}
+                            className="bg-gray-800 p-6 m-4 rounded-md mb-4"
+                          >
+                            <h4 className="text-white text-lg font-medium text-[20px]">
+                              {ativo.nomeAtivo}
+                            </h4>
+                            <p className="text-gray-200 text-[18px]">
+                              {ativo.quantidadeAtivos} ativos
+                            </p>
+                            <p className="text-green-400 font-semibold">
+                              Comprou por R${ativo.valorAtivo}
+                            </p>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="col-lg-12">
+                    <div className="border border-gray-300 rounded h-[60vh] mt-5 p-4 relative h-[calc(100%-5rem)] overflow-y-auto custom-scroll">
+                      <h3 className="text-[20px] text-white">Rentabilidade</h3>
+                      {rentabilidade.map((ativo) => (
+                        <div
+                          key={ativo.stock}
+                          className="bg-gray-800 p-6 m-4 rounded-md mb-4 "
+                        >
+                          <p className="text-white text-[20px] font-bold">{ativo.stock}</p>
+                          <p className='text-white text-[18px]'>Valor de Compra: R${ativo.valorCompra}</p>
+                          <p className='text-green-400'>
+                            Rentabilidade (%): {ativo.rentabilidadePorcentagem.toFixed(2)}
+                          </p>
+                          <p className='text-green-400'>
+                            Rentabilidade (Valor): R${ativo.rentabilidadeValor.toFixed(2)}
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
           </div>
         </div>
-      </div>
+      )}
 
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
@@ -234,15 +372,13 @@ export default function Carteira() {
                   </ul>
                 </div>
               )}
-
-
-
               <div className="mb-4">
-              {stockPrice !== null && (
-                <p className="text-gray-400 mt-2">Preço da Ação: {stockPrice}</p>
-              )}
+                {stockPrice !== null && (
+                  <p className="text-gray-400 mt-2">
+                    Preço da Ação: {stockPrice}
+                  </p>
+                )}
               </div>
-
               <div className="mb-4">
                 <label htmlFor="quantidade-ativos" className="block text-gray-700">
                   Quantidade de Ativos
@@ -256,10 +392,6 @@ export default function Carteira() {
                   required
                 />
               </div>
-
-
-
-
               <div className="mb-4">
                 <label htmlFor="valor-compra-ativo" className="block text-gray-700">
                   Valor de Compra do Ativo
@@ -269,12 +401,15 @@ export default function Carteira() {
                   type="text"
                   className="border border-gray-300 px-4 py-2 mt-1 block w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={valorAtivo}
-                  onChange={(e) => setValorAtivo(parseFloat(e.target.value))}
+                  onChange={(e) => setValorAtivo(e.target.value)}
                   required
                 />
               </div>
               <div className="flex justify-end">
-                <button className="bg-blue-500 text-white px-4 py-2 rounded" type="submit">
+                <button
+                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                  type="submit"
+                >
                   Adicionar
                 </button>
                 <button

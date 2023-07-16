@@ -1,6 +1,5 @@
 import React, { useEffect, useState } from 'react';
 
-
 export interface AcaoData {
   stock: string;
   name: string;
@@ -75,7 +74,7 @@ export default function Alert() {
     setPrecoAlvo(isNaN(value) ? undefined : value);
   };
 
-  const handleSalvarClick = () => {
+  const handleSalvarClick = async () => {
     const novoAlerta: Alerta = {
       acao: acaoSelecionada,
       gatilho: gatilhoSelecionado,
@@ -87,18 +86,25 @@ export default function Alert() {
     setTimeout(() => {
       setAlertaCriado(false);
     }, 5000);
-  };
 
-  useEffect(() => {
-    localStorage.setItem('alertasSalvos', JSON.stringify(alertasSalvos));
-  }, [alertasSalvos]);
+    try {
+      const response = await fetch('https://smartfinsoluction-backend.vercel.app/alerta', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(novoAlerta),
+      });
 
-  useEffect(() => {
-    const storedAlertas = localStorage.getItem('alertasSalvos');
-    if (storedAlertas) {
-      setAlertasSalvos(JSON.parse(storedAlertas));
+      if (!response.ok) {
+        throw new Error('Erro ao cadastrar o alerta.');
+      }
+
+      console.log('Alerta cadastrado com sucesso!');
+    } catch (error) {
+      console.log(error);
     }
-  }, []);
+  };
 
   const handleAbrirModal = () => {
     setModalAberto(true);
@@ -132,7 +138,6 @@ export default function Alert() {
 
     return () => clearInterval(interval);
   }, [acoes, alertasSalvos]);
-
 
   return (
     <div className='text-white p-4 rounded border border-white'>
@@ -212,7 +217,6 @@ export default function Alert() {
         </div>
       )}
 
-      {/* Renderizar alertas salvos ou mensagem */}
       {alertasSalvos.length > 0 ? (
         alertasSalvos.map((alerta, index) => (
           <div key={index} className='mt-4 p-2 bg-gray-600'>

@@ -62,7 +62,7 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
 
               // Verificar se os dados do usuário são válidos
               if (name && email) {
-                navigate('/dashboard');
+                navigate('/dashboard', { replace: true });
                 handleLogin();
               } else {
                 setError('Dados de usuário inválidos.');
@@ -86,7 +86,7 @@ export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
     const token = Cookies.get('token');
     if (token) {
       console.log("Token encontrado nos cookies:", token);
-      navigate('/dashboard');
+      navigate('/dashboard', { replace: true });
     }
   }, []);
 
