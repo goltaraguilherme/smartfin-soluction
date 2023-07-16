@@ -44,7 +44,8 @@ export function Router() {
 
   useEffect(() => {
     const token = Cookies.get('token');
-    if (token) {
+    const tokenLS = localStorage.getItem('token')
+    if (token && tokenLS) {
       login();
     } else {
       logout();

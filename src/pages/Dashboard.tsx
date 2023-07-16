@@ -7,6 +7,8 @@ import { CardGanhos } from "../components/Dashboard/CardGanhos";
 import { CardVisaoGeral } from "../components/Dashboard/CardVisaoGeral";
 import { CardNoticias } from "../components/Dashboard/CardNoticias";
 import Cookies from "js-cookie";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 export type FiiData = {
   id: number;
@@ -55,6 +57,17 @@ export default function Dashboard() {
   const [filterData, setFilterData] = useState(initialFilterData);
   const [userName, setUserName] = useState('');
 
+
+  const { isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (!token) {
+      logout();
+      navigate('/login');
+    }
+  }, [logout, navigate]);
 
   useEffect(() => {
     // Obtém o valor do cookie 'name'

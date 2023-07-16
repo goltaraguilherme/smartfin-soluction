@@ -43,6 +43,10 @@ export const Header = () => {
   Cookies.remove("token");
   Cookies.remove('name');
   Cookies.remove('email');
+
+  // Remove o token do localStorage
+  localStorage.removeItem('token');
+
     // Redireciona para a página de login (ou outra rota desejada)
     navigate('/')
     window.location.reload();
