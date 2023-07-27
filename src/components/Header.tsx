@@ -59,7 +59,7 @@ export const Header = () => {
         <div className="container pt-1 flex justify-between">
           <div className="logo flex justify-start items-center">
             <Link to="/dashboard">
-              <img className="img-fluid" src="../../../public/smartfinSoluction.png" alt="Logo" />
+              <img className="img-fluid" src="/smartfinSoluction.png" alt="Logo" />
             </Link>
           </div>
 
