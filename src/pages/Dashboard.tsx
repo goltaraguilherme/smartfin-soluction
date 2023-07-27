@@ -9,6 +9,8 @@ import { CardNoticias } from "../components/Dashboard/CardNoticias";
 import Cookies from "js-cookie";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { Swiper, SwiperSlide } from 'swiper/react';
+import 'swiper/swiper.min.css';
 
 export type FiiData = {
   id: number;
@@ -56,7 +58,7 @@ export default function Dashboard() {
       };
   const [filterData, setFilterData] = useState(initialFilterData);
   const [userName, setUserName] = useState('');
-
+  const [acoes, setAcoes] = useState<any[]>([]);
 
   const { isLoggedIn, logout } = useAuth();
   const navigate = useNavigate();
@@ -90,6 +92,21 @@ export default function Dashboard() {
     };
 
     fetchData();
+  }, []);
+
+
+  useEffect(() => {
+    const fetchAcoes = async () => {
+      try {
+        const response = await axios.get("https://brapi.dev/api/quote/list?limit=20");
+        const acoesData = response.data.stocks;
+        setAcoes(acoesData);
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchAcoes();
   }, []);
 
   useEffect(() => {
@@ -134,7 +151,7 @@ export default function Dashboard() {
         <div className="m-16 rounded p-16 bg-[#201F25]">
           <div className="container-fluid xs-container">
 
-            <div className="row">
+            <div className="row my-2">
               <div className="col-lg-6">
                 <h1 className="text-white mb-3 text-3xl text-left font-bold">Olá, {userName}</h1>
               </div>
@@ -158,8 +175,57 @@ export default function Dashboard() {
               </div>
 
               <div className="col-lg-9">
-                <FiiCards fiiData={fiiData} />
 
+              <Swiper
+              slidesPerView={3}
+              spaceBetween={10}
+              loop={true}
+              speed={3000}
+              autoplay={{
+                delay: 0,
+                disableOnInteraction: false,
+              }}
+             
+              
+            >
+                      {acoes.map((acao) => (
+                    <SwiperSlide key={acao.stock}>
+                      <div className="text-white bg-[#23242F] p-10 my-0 rounded">
+                        <div className="flex justify-between align-center">
+                          <div>
+                            <p className="font-bold">{acao.stock}</p>
+                            <h1 className="text-left">{acao.name}</h1>
+                          </div>
+                          <div>
+                            <img
+                              className="w-[70%] max-w-sm rounded"
+                              src={acao.logo}
+                              alt="Logo"
+                            />
+                          </div>
+                        </div>
+
+                        <div className="flex justify-between align-center w-[100%] pt-4">
+                          <div>
+                            <p className="text-[20px]">R${acao.close}</p>
+                          </div>
+                          <div>
+                            <p
+                              style={{
+                                color: acao.change < 0 ? "red" : "#01E59B",
+                                fontWeight: "700",
+                              }}
+                            >
+                              {acao.change}%
+                            </p>
+                          </div>
+                        </div>
+                      </div>
+                    </SwiperSlide>
+                  ))}
+            </Swiper>
+
+            
                 <div className="row">
 
                   <div className="col-lg-6">

@@ -9,7 +9,7 @@ import ReactApexChart from 'react-apexcharts';
 
 import { css } from '@emotion/react';
 import { ScaleLoader } from 'react-spinners';
-
+import { FaTrash, FaEdit } from 'react-icons/fa';
 
 interface StockData {
   stock: string;
@@ -23,6 +23,7 @@ interface StockData {
 }
 
 interface AtivoData {
+  id: number;
   nomeAtivo: string;
   quantidadeAtivos: number;
   valorAtivo: string;
@@ -41,6 +42,7 @@ interface StocksResponse {
 
 export default function Carteira() {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  const [editingAtivoId, setEditingAtivoId] = useState<number | null>(null);
   const [nomeAtivo, setNomeAtivo] = useState('');
   const [quantidadeAtivos, setQuantidadeAtivos] = useState(0);
   const [valorAtivo, setValorAtivo] = useState('');
@@ -143,10 +145,22 @@ export default function Carteira() {
 
   const handleOpenModal = () => {
     setIsModalOpen(true);
+    setEditingAtivoId(null);
+    setNomeAtivo('');
+    setQuantidadeAtivos(0);
+    setValorAtivo('');
+    setSugestoesAtivos([]);
+    setStockPrice(null);
   };
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
+    setEditingAtivoId(null);
+    setNomeAtivo('');
+    setQuantidadeAtivos(0);
+    setValorAtivo('');
+    setSugestoesAtivos([]);
+    setStockPrice(null);
   };
 
   const fetchAtivos = async () => {
@@ -181,6 +195,69 @@ export default function Carteira() {
 
         // Buscar os ativos atualizados
         fetchAtivos();
+        setSuccessAlert(true);
+      } else {
+        setErrorAlert(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setErrorAlert(true);
+    }
+  };
+
+  const handleEditAtivo = (id: number) => {
+    const ativo = ativos.find((ativo) => ativo.id === id);
+
+    if (ativo) {
+      setEditingAtivoId(ativo.id);
+      setNomeAtivo(ativo.nomeAtivo);
+      setQuantidadeAtivos(ativo.quantidadeAtivos);
+      setValorAtivo(ativo.valorAtivo);
+      setIsModalOpen(true);
+    }
+  };
+
+  const handleUpdateAtivo = async (id: number) => {
+    try {
+      const token = Cookies.get('token');
+      const response = await axios.put(
+        `https://smartfinsoluction-backend.vercel.app/user/${token}/ativo/${id}`,
+        {
+          nomeAtivo,
+          quantidadeAtivos,
+          valorAtivo,
+        }
+      );
+
+      if (response.status === 200) {
+        // Atualizar a lista de ativos
+        const updatedAtivos = ativos.map((ativo) =>
+          ativo.id === id ? { ...ativo, nomeAtivo, quantidadeAtivos, valorAtivo } : ativo
+        );
+        setAtivos(updatedAtivos);
+        handleCloseModal();
+        setSuccessAlert(true);
+      } else {
+        setErrorAlert(true);
+      }
+    } catch (error) {
+      console.log(error);
+      setErrorAlert(true);
+    }
+  };
+
+  const handleDeleteAtivo = async (id: number) => {
+    try {
+      const token = Cookies.get('token');
+      const response = await axios.delete(
+        `https://smartfinsoluction-backend.vercel.app/user/${token}/ativo/${id}`
+      );
+
+      if (response.status === 200) {
+        // Atualizar a lista de ativos
+        const updatedAtivos = ativos.filter((ativo) => ativo.id !== id);
+        setAtivos(updatedAtivos);
+        setSuccessAlert(true);
       } else {
         setErrorAlert(true);
       }
@@ -238,7 +315,7 @@ export default function Carteira() {
 
       {isLoading ? (
         <div className="h-screen flex items-center justify-center">
-        <ScaleLoader color="#fff" loading={isLoading} height={60} width={8} radius={4} />
+          <ScaleLoader color="#fff" loading={isLoading} height={60} width={8} radius={4} />
         </div>
       ) : (
         <div className="m-16 rounded p-16 bg-[#201F25]">
@@ -295,9 +372,25 @@ export default function Carteira() {
                             key={index}
                             className="bg-gray-800 p-6 m-4 rounded-md mb-4"
                           >
-                            <h4 className="text-white text-lg font-medium text-[20px]">
-                              {ativo.nomeAtivo}
-                            </h4>
+                            <div className="flex items-center justify-between">
+                              <h4 className="text-white text-lg font-medium text-[20px]">
+                                {ativo.nomeAtivo}
+                              </h4>
+                              <div>
+                                <button
+                                  className="text-green-400 mr-2"
+                                  onClick={() => handleEditAtivo(ativo.id)}
+                                >
+                                  <FaEdit />
+                                </button>
+                                <button
+                                  className="text-red-500"
+                                  onClick={() => handleDeleteAtivo(ativo.id)}
+                                >
+                                  <FaTrash />
+                                </button>
+                              </div>
+                            </div>
                             <p className="text-gray-200 text-[18px]">
                               {ativo.quantidadeAtivos} ativos
                             </p>
@@ -339,8 +432,10 @@ export default function Carteira() {
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
           <div className="bg-white rounded-lg p-8">
-            <h2 className="text-xl font-bold mb-4">Adicionar Ativo</h2>
-            <form onSubmit={handleAddAtivo}>
+            <h2 className="text-xl font-bold mb-4">
+              {editingAtivoId ? 'Editar Ativo' : 'Adicionar Ativo'}
+            </h2>
+            <form onSubmit={editingAtivoId ? () => handleUpdateAtivo(editingAtivoId) : handleAddAtivo}>
               <div className="mb-4">
                 <label htmlFor="nome-ativo" className="block text-gray-700">
                   Nome do Ativo
@@ -393,11 +488,11 @@ export default function Carteira() {
                 />
               </div>
               <div className="mb-4">
-                <label htmlFor="valor-compra-ativo" className="block text-gray-700">
-                  Valor de Compra do Ativo
+                <label htmlFor="valor-ativo" className="block text-gray-700">
+                  Valor do Ativo
                 </label>
                 <input
-                  id="valor-compra-ativo"
+                  id="valor-ativo"
                   type="text"
                   className="border border-gray-300 px-4 py-2 mt-1 block w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
                   value={valorAtivo}
@@ -407,13 +502,13 @@ export default function Carteira() {
               </div>
               <div className="flex justify-end">
                 <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded"
+                  className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
                   type="submit"
                 >
-                  Adicionar
+                  {editingAtivoId ? 'Atualizar' : 'Adicionar'}
                 </button>
                 <button
-                  className="bg-gray-500 text-white px-4 py-2 rounded ml-2"
+                  className="bg-gray-300 text-white px-4 py-2 rounded-md"
                   onClick={handleCloseModal}
                 >
                   Cancelar
@@ -425,18 +520,14 @@ export default function Carteira() {
       )}
 
       {successAlert && (
-        <div className="fixed top-0 right-0 m-4">
-          <div className="bg-green-500 text-white py-2 px-4 rounded-md">
-            Dados enviados com sucesso!
-          </div>
+        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md">
+          Ativo atualizado com sucesso!
         </div>
       )}
 
       {errorAlert && (
-        <div className="fixed top-0 right-0 m-4">
-          <div className="bg-red-500 text-white py-2 px-4 rounded-md">
-            Erro ao enviar os dados. Tente novamente.
-          </div>
+        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md">
+          Ocorreu um erro ao atualizar o ativo. Por favor, tente novamente.
         </div>
       )}
     </div>

@@ -19,6 +19,7 @@ import Acoes from './pages/Acoes';
 import AcoesDetalhes from './pages/AcoesDetalhes';
 import Alertas from './pages/Alertas';
 import { UserProvider } from './context/UserContext';
+import GastosPessoais from './pages/GastosPessoais';
 
 export function Router() {
   const navigate = useNavigate();
@@ -75,6 +76,7 @@ export function Router() {
           <>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/carteira" element={<Carteira />} />
+            <Route path="/gastos-pessoais" element={<GastosPessoais />} />
             <Route path="/ganho-acoes" element={<GanhoAcoes />} />
             <Route path="/fiis" element={<RendaVariavel />} />
             <Route path="/fiis/melhoresfiis" element={<MelhoresFiis />} />
