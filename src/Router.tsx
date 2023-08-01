@@ -79,7 +79,7 @@ export function Router() {
             <Route path="/gastos-pessoais" element={<GastosPessoais />} />
             <Route path="/ganho-acoes" element={<GanhoAcoes />} />
             <Route path="/fiis" element={<RendaVariavel />} />
-            <Route path="/fiis/melhoresfiis" element={<MelhoresFiis />} />
+            <Route path="/fiis/melhoresfiis/:filterData" element={<MelhoresFiis />} />
             <Route path="/acoes" element={<Acoes />} />
             <Route path="/acoes/:slug" element={<AcoesDetalhes />} />
             <Route path="/fiis/:id" element={<FiiDetalhes fiiData={fiiData} />} />

@@ -122,73 +122,61 @@ export default function Dashboard() {
     setIsModalOpen(false);
   };
 
-  const handleSubmit = (event: any) => {
+  const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-
+  
     setFilterData({
       pvp: filterData.pvp,
       dividendos: filterData.dividendos,
       vacanciaFisica: filterData.vacanciaFisica,
       vacanciaFinanceira: filterData.vacanciaFinanceira,
     });
-
+  
     // Após o salvamento dos dados, definir isLoading como false
     setIsLoading(false);
+  
+    // Redirecionar para a rota "/fiis/melhoresfiis" com os dados do filtro como parâmetros
+    navigate(`/fiis/melhoresfiis/${encodeURIComponent(JSON.stringify(filterData))}`);
   };
 
   
-
   return (
     <>
       <div className="h-[140vh] bg-[#13141B]">
-       
-       <div className="md:d-none">
-        <Header />
-       </div>
-
-
+        <div className="md:d-none">
+          <Header />
+        </div>
         <div className="m-16 rounded p-16 bg-[#201F25]">
           <div className="container-fluid xs-container">
-
             <div className="row my-2">
               <div className="col-lg-6">
                 <h1 className="text-white mb-3 text-3xl text-left font-bold">Olá, {userName}</h1>
               </div>
-
               <div className="col-lg-6">
                 <div className="d-flex justify-end">
                   <button onClick={handleOpenModal} className="bg-blue-500 p-[10px] text-white font-semibold rounded">
                     Filtrar melhores FIIS
                   </button>
                 </div>
-
               </div>
-
             </div>
-
-
             <div className="row">
-
               <div className="col-lg-3">
                 <CardMenu />
               </div>
-
               <div className="col-lg-9">
-
-              <Swiper
-              slidesPerView={3}
-              spaceBetween={10}
-              loop={true}
-              speed={3000}
-              autoplay={{
-                delay: 0,
-                disableOnInteraction: false,
-              }}
-             
-              
-            >
-                      {acoes.map((acao) => (
+                <Swiper
+                  slidesPerView={3}
+                  spaceBetween={10}
+                  loop={true}
+                  speed={3000}
+                  autoplay={{
+                    delay: 0,
+                    disableOnInteraction: false,
+                  }}
+                >
+                  {acoes.map((acao) => (
                     <SwiperSlide key={acao.stock}>
                       <div className="text-white bg-[#23242F] p-10 my-0 rounded">
                         <div className="flex justify-between align-center">
@@ -204,7 +192,6 @@ export default function Dashboard() {
                             />
                           </div>
                         </div>
-
                         <div className="flex justify-between align-center w-[100%] pt-4">
                           <div>
                             <p className="text-[20px]">R${acao.close}</p>
@@ -223,34 +210,22 @@ export default function Dashboard() {
                       </div>
                     </SwiperSlide>
                   ))}
-            </Swiper>
-
-            
+                </Swiper>
                 <div className="row">
-
                   <div className="col-lg-6">
                     <CardGanhos />
                   </div>
-
                   <div className="col-lg-6">
                     <CardVisaoGeral />
                   </div>
-
                 </div>
-
                 <div className="col-lg-12">
                   <CardNoticias />
                 </div>
-
               </div>
-
             </div>
-
           </div>
-
-
         </div>
-
       </div>
 
       {isModalOpen && (
@@ -263,13 +238,11 @@ export default function Dashboard() {
             <div className="inline-block align-bottom bg-[#201F25] rounded-lg text-left overflow-hidden shadow-xl transform transition-all sm:my-8 sm:align-middle sm:max-w-lg sm:w-full fixed top-1/2 left-1/2 transform -translate-x-1/2 -translate-y-1/2">
               <div className="bg-[#201F25] px-4 pt-5 pb-4 sm:p-6 sm:pb-4">
                 <div className="sm:flex flex-col sm:items-start">
-
                   <div className="mt-3 text-center sm:mt-0 sm:ml-0 sm:text-left">
                     <h3 className="text-lg leading-6 font-medium text-white">Filtrar melhores ações</h3>
                   </div>
-
                   <div className="w-100">
-                    <form action="" className="w-100">
+                    <form action="" className="w-100" onSubmit={handleSubmit}>
                       <label className="text-gray-400 py-4" htmlFor="">
                         P/VP - Quanto o mercado paga pela ação?
                         <br />
@@ -282,7 +255,6 @@ export default function Dashboard() {
                           placeholder="Ex.: 1"
                         />
                       </label>
-
                       <label className="text-gray-400 py-2" htmlFor="">
                         Quantos você quer receber de dividendos? (%)
                         <br />
@@ -301,7 +273,6 @@ export default function Dashboard() {
                           placeholder="Exemplo: 9%/ano"
                         />
                       </label>
-
                       <label className="text-gray-400 py-2" htmlFor="">
                         Vacância Física
                         <br />
@@ -314,8 +285,6 @@ export default function Dashboard() {
                           placeholder="Ex.: 10%"
                         />
                       </label>
-
-
                       <label className="text-gray-400 py-2" htmlFor="">
                         Vacância Financeira
                         <br />
@@ -328,15 +297,10 @@ export default function Dashboard() {
                           placeholder="Ex.: 10%"
                         />
                       </label>
-
                       <br />
-
-                      <button type="submit" onSubmit={handleSubmit} className="bg-blue-500 p-[10px] text-white font-semibold rounded"> Filtrar melhores FIIS</button>
-
+                      <button type="submit" className="bg-blue-500 p-[10px] text-white font-semibold rounded"> Filtrar melhores FIIS</button>
                     </form>
-
                   </div>
-
                 </div>
               </div>
               <div className="bg-[#201F25] px-4 py-3 sm:px-6 sm:flex sm:flex-row-reverse">
@@ -348,7 +312,6 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-
     </>
   );
 }
