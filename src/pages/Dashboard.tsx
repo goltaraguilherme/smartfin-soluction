@@ -1,14 +1,9 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
-import { CardMenu } from "../components/Dashboard/CardMenu";
-import { CardGanhos } from "../components/Dashboard/CardGanhos";
-import { CardVisaoGeral } from "../components/Dashboard/CardVisaoGeral";
-import { CardNoticias } from "../components/Dashboard/CardNoticias";
+
 import Cookies from "js-cookie";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { Swiper, SwiperSlide } from 'swiper/react';
-import 'swiper/swiper.min.css';
 
 export type FiiData = {
   id: number;
@@ -101,9 +96,10 @@ export default function Dashboard() {
         const response = await axios.get("https://brapi.dev/api/quote/list?limit=10");
         const acoesData = response.data.stocks;
         setAcoes(acoesData);
-
+        
         acoesData.sort((a: any, b: any) => {
-          if(a.change > b.change) return 1
+          if(Number(a.change) > Number(b.change)) return -1
+          else return 1
         })
 
         console.log(acoesData);
@@ -156,32 +152,40 @@ export default function Dashboard() {
           <h3 className="font-semibold text-lg">Favoritados</h3>
           <ul className="flex flex-row gap-3 overflow-auto no-scrollbar">
             {acoes.map((acao) => (
-              <li key={acao.stock} className="flex justify-between text-white bg-[#EDEEF0] min-w-[20%] max-w-[22rem] p-3 rounded" >
-                  <div className="flex flex-col item-start justify-between">
-                    <div className="flex bg-black p-2 rounded-lg gap-2 items-center justify-between">
-                      <img
-                        className="w-5 h-5 rounded-sm"
-                        src={acao.logo}
-                        alt="Logo"
-                      />
-                      <p className="font-medium text-xs">{acao.name}</p>
+                  <li key={acao.stock} className="flex justify-between text-white bg-[#EDEEF0] min-w-[20%] max-w-[22rem] p-3 rounded" >
+                    <div className="flex flex-col item-start justify-between">
+                      <div className="flex bg-black p-2 rounded-lg gap-2 items-center justify-between">
+                        <img
+                          className="w-5 h-5 rounded-sm"
+                          src={acao.logo}
+                          alt="Logo"
+                        />
+                        <p className="font-medium text-xs">{acao.name}</p>
+                      </div>
+                      <div className="flex flex-col">
+                        <h4 className="font-semibold text-sm text-[#5E5F64]">
+                          Carteira
+                        </h4>
+                        <h2 className="font-semibold text-base text-black">
+                          {Number(acao.change).toFixed(4)}
+                        </h2>
+                      </div>
                     </div>
-                    <h2 className="font-semibold text-base text-black">
-                      {Number(acao.change).toFixed(4)}
-                    </h2>
-                  </div>
-                  <div className="flex flex-col items-end justify-between">
-                    <p className="font-semibold text-[#5E5F64] text-sm">
-                      {acao.stock}
-                    </p>
-                    <img
-                      className="flex-1"
-                      src="/assets/positive-rate.png"
-                      alt="Ações com alta"
-                    />
-                  </div>
-              </li>
-            ))}
+                    <div className="flex flex-col items-end justify-between">
+                      <p className="font-semibold text-[#5E5F64] text-sm">
+                        {acao.stock}
+                      </p>
+                      <h2 className={`font-bold text-sm ${Number(acao.change) >= 0 ? "text-[#5DDF52]": "text-[#FF2727]"}`}>
+                        {Number(acao.change) > 0 && ("+")}{Number(acao.change).toFixed(2)}%
+                      </h2>
+                      <img
+                        className="flex-1"
+                        src="/assets/positive-rate.png"
+                        alt="Ações com alta"
+                      />
+                    </div>
+                  </li>
+              ))}
           </ul>
         </div> 
         <div className="col-span-5 row-span-4 bg-white px-4 py-3 rounded-lg">
@@ -360,3 +364,5 @@ export default function Dashboard() {
     </>
   );
 }
+
+
