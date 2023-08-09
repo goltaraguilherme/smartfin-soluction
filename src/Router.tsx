@@ -72,7 +72,7 @@ export function Router() {
           </>
         )}
 
-        {isLoggedIn && (
+        {true && (
           <>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/carteira" element={<Carteira />} />
