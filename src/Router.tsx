@@ -22,11 +22,12 @@ import { UserProvider } from './context/UserContext';
 import GastosPessoais from './pages/GastosPessoais';
 
 export function Router() {
+  const [fiiData, setFiiData] = useState<FiiData[]>([]);
+  const location = useLocation();
+
   const navigate = useNavigate();
   const { isLoggedIn, login, logout } = useAuth();
   const { setCurrentRoute } = useRoute();
-  const [fiiData, setFiiData] = useState<FiiData[]>([]);
-  const location = useLocation();
 
   useEffect(() => {
     const fetchData = async () => {
@@ -65,14 +66,12 @@ export function Router() {
   return (
     <UserProvider>
       <Routes>
-        {!isLoggedIn && (
+        {!isLoggedIn ? 
           <>
-            <Route path="/" element={<Login handleLogin={handleLogin} isLoggedIn={isLoggedIn} />} />
+            <Route path="/login" element={<Login handleLogin={handleLogin} />} />
             <Route path="/cadastro" element={<Cadastro />} />
           </>
-        )}
-
-        {true && (
+          : 
           <>
             <Route path="/dashboard" element={<Dashboard />} />
             <Route path="/carteira" element={<Carteira />} />
@@ -85,7 +84,7 @@ export function Router() {
             <Route path="/fiis/:id" element={<FiiDetalhes fiiData={fiiData} />} />
             <Route path="/alertas" element={<Alertas />} />
           </>
-        )}
+        }
       </Routes>
     </UserProvider>
   );

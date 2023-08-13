@@ -1,11 +1,11 @@
 import React, { useContext, useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { Header } from '../components/Header';
 import styles from '../login.module.css';
 import axios from 'axios';
 import Cookies from 'js-cookie';
 import { UserContext } from '../context/UserContext';
 import SplashScreen from '../components/SplashScreen';
+import { useAuth } from '../context/AuthContext';
 
 interface User {
   name: string;
@@ -15,10 +15,9 @@ interface User {
 
 interface LoginProps {
   handleLogin: () => void;
-  isLoggedIn: boolean;
 }
 
-export default function Login({ handleLogin, isLoggedIn }: LoginProps) {
+export default function Login({ handleLogin }: LoginProps) {
   const navigate = useNavigate();
   const { setUser } = useContext(UserContext);
 
