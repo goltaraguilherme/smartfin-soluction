@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
 import axios from 'axios';
 import styles from './Dashboard/Header.module.css';
 import Cookies from 'js-cookie';
+import { useAuth } from '../context/AuthContext';
 
 type AtivoProps = {
   stock: string,
@@ -77,18 +78,28 @@ export const Header = () => {
   const [sugestoesAtivos, setSugestoesAtivos] = useState<AtivoProps[]>()
   const debounceQuery = useDebounceValue(inputText);
 
+  const { logout } = useAuth();
+
+  let location = useLocation();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
   };
 
   useEffect(() => {
+    const token = Cookies.get('token');
+    if (!token) {
+      logout();
+      navigate('/login');
+    }
+  }, [logout, navigate]);
+
+  useEffect(() => {
     // Obtém o valor do cookie 'name'
     const name = Cookies.get('name');
     if (name) {
-      setUserName(name);
+      setUserName(name.split(' ')[0]);
     }
-    setUserName("Guilherme");
   }, []);
 
   const toggleNotifications = () => {
@@ -102,6 +113,9 @@ export const Header = () => {
   };
 
   const handleLogout = () => {
+
+    navigate('/login')
+    window.location.reload();
  
   Cookies.remove("token");
   Cookies.remove('name');
@@ -111,8 +125,7 @@ export const Header = () => {
   localStorage.removeItem('token');
 
     // Redireciona para a página de login (ou outra rota desejada)
-    navigate('/')
-    window.location.reload();
+    
   };
 
   async function fetchSugestoesAtivos(nomeAtivo: string){
@@ -140,9 +153,7 @@ export const Header = () => {
       >
         <div className="flex items-center justify-between w-[100%] px-6">
           <div className="flex w-[15%] justify-center items-center">
-            <Link to="/dashboard">
-              <h4 className="font-bold text-lg">Home</h4>
-            </Link>
+            <h4 className="font-bold text-lg capitalize">{location.pathname.split('/').slice(1)[0]}</h4>
           </div>
 
           {/* Input */}
@@ -157,7 +168,7 @@ export const Header = () => {
                 value={inputText}
               />
             </div>
-            {sugestoesAtivos?.length > 0 && (
+            {sugestoesAtivos && sugestoesAtivos?.length > 0 && (
               <div className="absolute mt-5 px-2 bg-white border border-gray-200 rounded shadow z-2">
                 <ul className="mt-2">
                   {sugestoesAtivos?.slice(0, 5).map((ativo: AtivoProps) => (

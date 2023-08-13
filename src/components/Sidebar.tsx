@@ -6,10 +6,6 @@ export const Sidebar = () => {
     const [isOpen, setIsOpen] = useState<boolean>(false);
     let location = useLocation();
 
-    useEffect(() => {
-        console.log(location.pathname);
-    }, [location])
-
     return (
         <div className={`border border-gray-800 py-4 px-2 ${isOpen ? 'w-[15%]' : 'w-[7%]'} ease-in-out duration-200`}>
             <div className="flex my-[5vh] mr-4 justify-end">

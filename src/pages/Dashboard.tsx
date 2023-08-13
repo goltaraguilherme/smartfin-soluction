@@ -4,6 +4,15 @@ import axios from 'axios';
 import Cookies from "js-cookie";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import { CardFavoritos } from "../components/Dashboard/CardFavoritos";
+import { CardMain } from "../components/Dashboard/CardMain";
+
+type AcaoProps = {
+  stock: string,
+  logo: string,
+  name: string,
+  change: string
+}
 
 export type FiiData = {
   id: number;
@@ -40,6 +49,7 @@ export default function Dashboard() {
   const [fiiData, setFiiData] = useState<FiiData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
+  const [loadingAcoes, setLoadingAcoes] = useState<boolean>(true);
   const storedFilterData = localStorage.getItem("filterData");
   const initialFilterData = storedFilterData
     ? JSON.parse(storedFilterData)
@@ -51,27 +61,17 @@ export default function Dashboard() {
       };
   const [filterData, setFilterData] = useState(initialFilterData);
   const [userName, setUserName] = useState('');
-  const [acoes, setAcoes] = useState<any[]>([]);
-  const [topAcoes, setTopAcoes] = useState<any[]>([]);
-
-  const { isLoggedIn, logout } = useAuth();
+  const [acoes, setAcoes] = useState<AcaoProps[]>([]);
+  const [topAcoes, setTopAcoes] = useState<AcaoProps[]>([]);
+  
   const navigate = useNavigate();
-
-  // useEffect(() => {
-  //   const token = Cookies.get('token');
-  //   if (!token) {
-  //     logout();
-  //     navigate('/login');
-  //   }
-  // }, [logout, navigate]);
 
   useEffect(() => {
     // Obtém o valor do cookie 'name'
-    // const name = Cookies.get('name');
-    // if (name) {
-    //   setUserName(name);
-    // }
-    setUserName("Guilherme")
+    const name = Cookies.get('name');
+    if (name) {
+      setUserName(name.split(' ')[0]);
+    }
   }, []);
 
   useEffect(() => {
@@ -97,19 +97,21 @@ export default function Dashboard() {
         const acoesData = response.data.stocks;
         setAcoes(acoesData);
         
-        acoesData.sort((a: any, b: any) => {
+        let topAcoes = acoesData.sort((a: any, b: any) => {
           if(Number(a.change) > Number(b.change)) return -1
           else return 1
-        })
+        }).slice(0,3)
 
-        console.log(acoesData);
-        setTopAcoes(acoesData.slice(0,3))
+        setTopAcoes(topAcoes)
+        setLoadingAcoes(false);
       } catch (error) {
         console.log(error);
+        setLoadingAcoes(false);
       }
     };
 
     fetchAcoes();
+    
     console.log(acoes)
   }, []);
 
@@ -148,88 +150,28 @@ export default function Dashboard() {
   return (
     <>
       <div className="grid grid-cols-9 grid-rows-11 gap-2 h-[100%] w-[100%]">
-        <div className="flex flex-col col-span-9 row-span-3 bg-white px-4 py-2 rounded-lg">
-          <h3 className="font-semibold text-lg">Favoritados</h3>
+        <div className="flex flex-col col-span-9 gap-2 row-span-3 bg-white px-4 py-2 rounded-lg">
+          <div className="flex justify-between">
+            <h3 className="font-semibold text-lg">
+              Favoritados
+            </h3>
+            <button 
+              className="bg-[#0E0E19] rounded-lg p-2"
+              onClick={() => {setIsModalOpen(true)}}>
+              <h4 className="text-white">
+                Editar
+              </h4>
+            </button>
+          </div>
+          
           <ul className="flex flex-row gap-3 overflow-auto no-scrollbar">
-            {acoes.map((acao) => (
-                  <li key={acao.stock} className="flex justify-between text-white bg-[#EDEEF0] min-w-[20%] max-w-[22rem] p-3 rounded" >
-                    <div className="flex flex-col item-start justify-between">
-                      <div className="flex bg-black p-2 rounded-lg gap-2 items-center justify-between">
-                        <img
-                          className="w-5 h-5 rounded-sm"
-                          src={acao.logo}
-                          alt="Logo"
-                        />
-                        <p className="font-medium text-xs">{acao.name}</p>
-                      </div>
-                      <div className="flex flex-col">
-                        <h4 className="font-semibold text-sm text-[#5E5F64]">
-                          Carteira
-                        </h4>
-                        <h2 className="font-semibold text-base text-black">
-                          {Number(acao.change).toFixed(4)}
-                        </h2>
-                      </div>
-                    </div>
-                    <div className="flex flex-col items-end justify-between">
-                      <p className="font-semibold text-[#5E5F64] text-sm">
-                        {acao.stock}
-                      </p>
-                      <h2 className={`font-bold text-sm ${Number(acao.change) >= 0 ? "text-[#5DDF52]": "text-[#FF2727]"}`}>
-                        {Number(acao.change) > 0 && ("+")}{Number(acao.change).toFixed(2)}%
-                      </h2>
-                      <img
-                        className="flex-1"
-                        src="/assets/positive-rate.png"
-                        alt="Ações com alta"
-                      />
-                    </div>
-                  </li>
+            {acoes.length > 0 && acoes.map((acao:AcaoProps, index) => (
+                  <CardFavoritos acao={acao} key={String(index)} />
               ))}
           </ul>
         </div> 
         <div className="col-span-5 row-span-4 bg-white px-4 py-3 rounded-lg">
-            <div className="flex justify-between">
-              <div className="flex flex-col justify-evenly items-start">
-                <h1 className="font-medium text-4xl">
-                  Bem-vindo, {userName}    
-                </h1>
-                <h2 className="font-medium text-xl text-[#5E5F64]">
-                  Veja sua carteira
-                </h2>
-              </div>
-
-              <div className="flex flex-col justify-between items-end">
-                <div className="flex bg-[#D9D9D9] items-center p-1 rounded-lg w-[60%]">
-                  <button className="flex flex-1 items-center justify-center bg-white p-1 rounded-lg">
-                    <p>1</p>
-                  </button>
-                  <button className="flex flex-1 items-center justify-center p-1 rounded-lg">
-                    <p>2</p>
-                  </button>
-                </div>
-                <div className="bg-gradient-to-r from-[#FFDFA0] to-[#FDB52A] p-1 rounded-lg mt-4">
-                  <span className="font-medium text-xl">
-                    Nível Gold
-                  </span>
-                </div>
-              </div>
-            </div>
-           
-            
-            <div className="flex flex-col gap-2 mt-2">
-              <h1 className="font-medium text-3xl">
-                R$999.999,99
-              </h1>
-              <div className="flex gap-1 w-[100%] h-3">
-                <div className="rounded-lg bg-green-600 w-[60%]" />
-                <div className="rounded-lg bg-yellow-600  w-[30%]" />
-                <div className="rounded-lg bg-blue-600  w-[10%]"/>
-              </div>
-              <p>
-                Continue investindo, realize o seu sonho
-              </p>
-            </div>
+            <CardMain userName = {userName}/>
         </div>
           
         <div className="col-span-4 row-span-4 bg-white px-4 py-3 rounded-lg max-h-[34vh] overflow-y-scroll no-scrollbar">
@@ -336,7 +278,7 @@ export default function Dashboard() {
                     <h6 className="text-[#595959]">
                       Muito bom! continue
                     </h6>
-                    <div className="flex bg-[#28292B] w-[50%] py-1 px-3 rounded-lg items-center justify-center gap-2">
+                    <div className="flex bg-[#28292B] w-[50%] py-1 px-2 rounded-lg items-center justify-center gap-2">
                       <img src="/assets/seta-subida.png" alt="" />
                       <h4 className="text-[#5DDF52]">
                         +16,5%
