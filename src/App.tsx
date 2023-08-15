@@ -1,13 +1,25 @@
+import { useEffect } from 'react';
+import Cookies from 'js-cookie';
 import { Router } from './Router';
 import { useAuth } from './context/AuthContext';
+import { useNavigate } from 'react-router';
 import { RouteProvider } from './context/RouteContext';
 import { UserProvider } from './context/UserContext';
 import { Header } from './components/Header';
 import { Sidebar } from './components/Sidebar';
 
 function App() {
-  const { isLoggedIn } = useAuth();
+  const { isLoggedIn, logout } = useAuth();
+  const navigate = useNavigate();
   
+  useEffect(() => {
+    const token = Cookies.get('token');
+    if (!token) {
+      logout();
+      navigate('/login');
+    }
+  }, [logout, navigate]);
+
   return (
     <UserProvider>
       <RouteProvider>
