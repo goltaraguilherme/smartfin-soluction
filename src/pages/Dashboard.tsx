@@ -2,7 +2,6 @@ import { useEffect, useState } from "react";
 import axios from 'axios';
 
 import Cookies from "js-cookie";
-import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
 import { CardFavoritos } from "../components/Dashboard/CardFavoritos";
 import { CardMain } from "../components/Dashboard/CardMain";
@@ -11,7 +10,9 @@ type AcaoProps = {
   stock: string,
   logo: string,
   name: string,
-  change: string
+  change: string,
+  volume: string,
+  sector: null | string
 }
 
 export type FiiData = {
@@ -63,8 +64,23 @@ export default function Dashboard() {
   const [userName, setUserName] = useState('');
   const [acoes, setAcoes] = useState<AcaoProps[]>([]);
   const [topAcoes, setTopAcoes] = useState<AcaoProps[]>([]);
+  const [acoesFiltradas, setAcoesFiltradas] = useState<AcaoProps[]>([]);
+  const [acoesFavoritas, setAcoesFavoritas] = useState<AcaoProps[]>([]);
   
   const navigate = useNavigate();
+
+  function handleFavorite(acao:AcaoProps){
+    if(acoesFavoritas.find((item) => item.name == acao.name)){
+      let indexAcao = acoesFavoritas.findIndex((item) => item.name == acao.name)
+      let acoesFvoritasNew = [...acoesFavoritas];
+      acoesFvoritasNew.splice(indexAcao, 1)
+      setAcoesFavoritas(acoesFvoritasNew);
+      localStorage.setItem("acoesFavoritas", JSON.stringify(acoesFvoritasNew));
+    }else{
+      setAcoesFavoritas([...acoesFavoritas, acao])
+      localStorage.setItem("acoesFavoritas", JSON.stringify([...acoesFavoritas, acao]));
+    }
+  }
 
   useEffect(() => {
     // Obtém o valor do cookie 'name'
@@ -73,6 +89,13 @@ export default function Dashboard() {
       setUserName(name.split(' ')[0]);
     }
   }, []);
+
+  useEffect(() => {
+    let acoesFavoritasSalvas = localStorage.getItem("acoesFavoritas")!
+    if (acoesFavoritasSalvas) setAcoesFavoritas(JSON.parse(acoesFavoritasSalvas))
+    
+  }, []);
+
 
   useEffect(() => {
     const fetchData = async () => {
@@ -96,11 +119,13 @@ export default function Dashboard() {
         const response = await axios.get("https://brapi.dev/api/quote/list?limit=10");
         const acoesData = response.data.stocks;
         setAcoes(acoesData);
-        
+
         let topAcoes = acoesData.sort((a: any, b: any) => {
           if(Number(a.change) > Number(b.change)) return -1
           else return 1
         }).slice(0,3)
+
+        setAcoesFiltradas(acoesData)
 
         setTopAcoes(topAcoes)
         setLoadingAcoes(false);
@@ -118,15 +143,6 @@ export default function Dashboard() {
   useEffect(() => {
     localStorage.setItem("filterData", JSON.stringify(filterData));
   }, [filterData]);
-
-  const handleOpenModal = () => {
-    setIsModalOpen(true);
-    setIsLoading(true);
-  };
-
-  const handleCloseModal = () => {
-    setIsModalOpen(false);
-  };
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -146,6 +162,9 @@ export default function Dashboard() {
     navigate(`/fiis/melhoresfiis/${encodeURIComponent(JSON.stringify(filterData))}`);
   };
 
+  function handleSearchStock(e:any){
+    setAcoesFiltradas(acoes.filter((acao) => acao.stock.toLowerCase().includes(e.target.value.toLowerCase())))
+  }
   
   return (
     <>
@@ -165,9 +184,24 @@ export default function Dashboard() {
           </div>
           
           <ul className="flex flex-row gap-3 overflow-auto no-scrollbar">
-            {acoes.length > 0 && acoes.map((acao:AcaoProps, index) => (
-                  <CardFavoritos acao={acao} key={String(index)} />
-              ))}
+            {acoesFavoritas?.length > 0 ?
+                  acoesFavoritas.map((acao:AcaoProps, index) => (
+                      <CardFavoritos acao={acao} key={String(index)} />
+                  ))
+                :
+                <div className="flex flex-col flex-1 items-center justify-center">
+                    <h3 className="font-semibold text-lg">
+                      Você ainda não favoritou nenhuma ação
+                    </h3>
+                    <button
+                      onClick={() => setIsModalOpen(true)} 
+                      className="bg-[#0E0E19] rounded-lg py-2 px-3">
+                      <h3 className="text-white">
+                        Editar ativos favoritos
+                      </h3>
+                    </button>
+                </div>
+            }
           </ul>
         </div> 
         <div className="col-span-5 row-span-4 bg-white px-4 py-3 rounded-lg">
@@ -303,6 +337,104 @@ export default function Dashboard() {
             <div className="bg-[#058FF2] w-[18%] rounded-lg" />
         </div>
       </div>
+
+      {
+        isModalOpen &&
+          <div className={`fixed inset-0  flex items-center justify-center bg-black bg-opacity-75 translate-y-[0%] z-10`}>
+            <div className={`bg-[#EDEEF0] rounded-lg w-[40%] h-[70%] p-4 overflow-scroll no-scrollbar`}>
+              <div className="flex items-center justify-center">
+                <button onClick={() => {
+                  setIsModalOpen(false)}}
+                  >
+                  <img src="/assets/seta-voltar.png" alt="Voltar" />
+                </button>
+                <h1 className="flex-1 text-center font-bold text-[#0E0E19] text-2xl">
+                  Busque por um Ativo
+                </h1>
+              </div>
+              <div className="flex gap-3 my-4">
+                <div className="flex p-2 rounded-lg flex-1 border-gray-500 border-2 px-4">
+                  <input 
+                    type="text" 
+                    className="flex-1 bg-transparent text-[#0E0E19] placeholder-[#0E0E19] outline-none"
+                    placeholder="Pesquisar por um Ativo"
+                    onChange={(e) => handleSearchStock(e)}
+                    />
+                  <img src="/assets/buscar-lupa.png" alt="Buscar" />
+                </div>
+                <button className="flex items-center justify-center aspect-square p-2 border-gray-500 border-[1px] rounded-lg hover:bg-gray-300 duration-150 ease-out">
+                    <img src="/assets/filtros.png" alt="Filtros" />
+                </button>
+              </div>
+              <h3 className="font-bold text-[#0E0E19] text-lg">
+                Ativos mais buscados
+              </h3>
+              <ul className="grid grid-cols-3 overflow-y-scroll no-scrollbar gap-3 mt-3">
+                {
+                  acoesFiltradas?.length > 0 ? 
+                    acoesFiltradas?.map((acao, idx) => (
+                      <li key={String(idx)} className="flex flex-col border-gray-500 border-2 rounded-xl justify-between">
+                        <div className="flex p-3">
+                          <div className="flex flex-col flex-1">
+                            <h3 className="font-bold text-[#0E0E19] text-lg">
+                              {acao.stock}
+                            </h3>
+                            <h4 className="text-[#0E0E19]">
+                              {acao.name}
+                            </h4>
+                          </div>
+                          <button className="items-start justify-start"
+                            onClick={() => handleFavorite(acao)}>
+                            <img 
+                              className="w-9 h-9" 
+                              src={`${(acoesFavoritas.find((item) => item.name == acao.name)) ? "/assets/removefav.png" : "/assets/Add.png"}`} 
+                              alt="Favoritar ativo" 
+                            />
+                          </button>
+                        </div>
+                        <div className="h-[1px] bg-gray-500"/>
+                        <div className="flex">
+                          <div className="flex-1 flex-col p-3">
+                            <h6 className="text-xs">
+                              Volume
+                            </h6>
+                            <h5>
+                              {(Number(acao.volume)/10e6).toFixed(2)}M
+                            </h5>
+                          </div>
+                          <div className="flex-1 flex-col p-3">
+                            <h6 className="text-xs">
+                              D.Yield
+                            </h6>
+                            <h5>
+                              9.51%
+                            </h5>
+                          </div>
+                        </div>
+                        <div className="flex items-center justify-center bg-[#262632] rounded-xl p-2 gap-3">
+                          <h4
+                            className={`font-semibold ${Number(acao.change) >= 0 ? "text-[#5DDF52]" : "text-[#FF2727]"}`}
+                          >
+                            {Number(acao.change) > 0 && "+"}
+                            {Number(acao.change).toFixed(2)}%
+                          </h4>
+                          <img className={`${Number(acao.change) < 0 && "rotate-90"}`} src="/assets/seta-subida.png" alt="Ativo com alta" />
+                        </div>
+                      </li>
+                  ))
+                  :
+                  <div className="col-span-3 mt-[20%]">
+                     <h3 className="text-center font-bold text-[#0E0E19] text-xl">
+                      Não foram encontrados ativos
+                    </h3>
+                  </div>
+                  
+                }
+              </ul>
+            </div>
+          </div>
+      }
+      
     </>
   );
 }

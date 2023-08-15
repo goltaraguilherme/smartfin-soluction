@@ -87,14 +87,6 @@ export const Header = () => {
   };
 
   useEffect(() => {
-    const token = Cookies.get('token');
-    if (!token) {
-      logout();
-      navigate('/login');
-    }
-  }, [logout, navigate]);
-
-  useEffect(() => {
     // Obtém o valor do cookie 'name'
     const name = Cookies.get('name');
     if (name) {
