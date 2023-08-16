@@ -1,20 +1,86 @@
-import React, { useEffect, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { AiOutlineBell } from 'react-icons/ai';
-import { RiArrowDownSLine } from 'react-icons/ri';
+import { useEffect, useState } from 'react';
+import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { FaBars, FaTimes } from 'react-icons/fa';
+import axios from 'axios';
 import styles from './Dashboard/Header.module.css';
 import Cookies from 'js-cookie';
+import { useAuth } from '../context/AuthContext';
+
+type AtivoProps = {
+  stock: string,
+  name: string
+}
+
+type StockData = {
+  stock: string;
+  name: string;
+}
+
+type StocksResponse = {
+  stocks: StockData[];
+}
+
+type NotificationProps = {
+  id: string,
+  type: string,
+  content: string,
+  date: string
+}
+
+function useDebounceValue(value: string, time = 250){
+  const [ debounceValue, setDebounceValue ] = useState<string>(value);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      setDebounceValue(value);
+    }, time)
+
+  return () => {
+    clearTimeout(timeout);
+  }
+
+  }, [value, time]);
+
+  return debounceValue;
+}
+
+const notifications = [
+  {
+    id: '0',
+    type: 'Contato',
+    content: 'Contato',
+    date: '07/08/2023',
+  },
+  {
+    id: '1',
+    type: 'Contato',
+    content: 'Contato',
+    date: '07/08/2023',
+  },
+  {
+    id: '2',
+    type: 'Alerta',
+    content: 'CPLE4 atingiu o preço desejado, vamos negociar?',
+    date: '07/08/2023',
+  }
+]
 
 export const Header = () => {
   
   const navigate = useNavigate();
   
-  const [notificationsOpen, setNotificationsOpen] = useState(false);
-  const [userDropdownOpen, setUserDropdownOpen] = useState(false);
-  const [isOpen, setIsOpen] = useState(false);
-  const [userName, setUserName] = useState('');
+  const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
+  const [notificationsList, setNotifications] = useState<Array<NotificationProps>>(notifications);
+  const [userDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
+  const [isOpen, setIsOpen] = useState<boolean>(false);
+  const [userName, setUserName] = useState<string>();
+  const [inputText, setInputText] = useState<string>("");
+  const [sugestoesAtivos, setSugestoesAtivos] = useState<AtivoProps[]>()
+  const debounceQuery = useDebounceValue(inputText);
 
+  const { logout } = useAuth();
+
+  let location = useLocation();
 
   const toggleMenu = () => {
     setIsOpen(!isOpen);
@@ -24,7 +90,7 @@ export const Header = () => {
     // Obtém o valor do cookie 'name'
     const name = Cookies.get('name');
     if (name) {
-      setUserName(name);
+      setUserName(name.split(' ')[0]);
     }
   }, []);
 
@@ -39,6 +105,9 @@ export const Header = () => {
   };
 
   const handleLogout = () => {
+
+    navigate('/login')
+    window.location.reload();
  
   Cookies.remove("token");
   Cookies.remove('name');
@@ -48,66 +117,176 @@ export const Header = () => {
   localStorage.removeItem('token');
 
     // Redireciona para a página de login (ou outra rota desejada)
-    navigate('/')
-    window.location.reload();
-
+    
   };
+
+  async function fetchSugestoesAtivos(nomeAtivo: string){
+    try {
+      const response = await axios.get<StocksResponse>(
+        `https://brapi.dev/api/quote/list?search=${nomeAtivo}`
+      );
+      setSugestoesAtivos(response.data.stocks);
+
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    if (debounceQuery) fetchSugestoesAtivos(debounceQuery);
+    if(debounceQuery == "") setSugestoesAtivos([])
+
+  }, [debounceQuery]);
 
   return (
     <>
-      <header className={`bg-transparent flex justify-between items-center px-0 w-100 py-4 ${styles.headerDesktop}`}>
-        <div className="container pt-1 flex justify-between">
-          <div className="logo flex justify-start items-center">
-            <Link to="/dashboard">
-              <img className="img-fluid" src="/smartfinSoluction.png" alt="Logo" />
-            </Link>
+      <header
+        className={`bg-white flex h-[9vh] w-[100%] ${styles.headerDesktop}`}
+      >
+        <div className="flex items-center justify-between w-[100%] px-6">
+          <div className="flex w-[15%] justify-center items-center">
+            <h4 className="font-bold text-lg capitalize">{location.pathname.split('/').slice(1)[0]}</h4>
           </div>
 
-          <div className="flex justify-end">
-            <div>
-              <span className="text-white text-[16px] flex items-center">
-                <button
-                  className="text-white flex items-center  text-[16px] focus:outline-none"
-                  onClick={toggleNotifications}
-                >
-                  <AiOutlineBell className="text-[25px]" /> Notificações
-                  <RiArrowDownSLine className="text-[18px]" />
-                </button>
-
-                {notificationsOpen && (
-                  <ul className="absolute right-[10%] top-[8%] mt-2 p-4 w-[30%] bg-white border border-gray-200 rounded shadow">
-                    <p className='text-black text-[18px]'>Oba! Alerta Novo</p>
-                  </ul>
-                )}
-              </span>
+          {/* Input */}
+          <div className="w-[40%] flex flex-col">
+            <div className="bg-[#E1E3E6] flex items-center py-2 px-3 rounded-lg">
+              <img className="w-7 h-7" src="/assets/Search.png" alt="Buscar" />
+              <input
+                className="bg-transparent w-[100%] ml-2 text-[#5E5F64] placeholder-[#5E5F64] outline-none text-sm"
+                type="text"
+                placeholder="Pesquise por uma ação"
+                onChange={(e) => setInputText(e.target.value)}
+                value={inputText}
+              />
             </div>
-
-            <div className="pl-10">
-              <div className="relative">
-                <button
-                  className="text-white flex items-center  text-[16px] focus:outline-none"
-                  onClick={toggleUserDropdown}
-                >
-                  {userName} <RiArrowDownSLine className="text-[18px]" />
-                </button>
-
-                {userDropdownOpen && (
-                  <ul className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow">
-                    <li className="py-2 px-4 hover:bg-gray-100">
-                      <Link to="/meu-perfil">Meu perfil</Link>
+            {sugestoesAtivos && sugestoesAtivos?.length > 0 && (
+              <div className="absolute mt-5 px-2 bg-white border border-gray-200 rounded shadow z-2">
+                <ul className="mt-2">
+                  {sugestoesAtivos?.slice(0, 5).map((ativo: AtivoProps) => (
+                    <li
+                      key={ativo.stock}
+                      className="cursor-pointer text-gray-700 text-sm font-medium hover:bg-gray-200 px-4 py-2 rounded-md"
+                      onClick={() => {
+                        setInputText(`${ativo.stock} - ${ativo.name}`)
+                        setSugestoesAtivos([])
+                      }}
+                    >
+                      {ativo.stock} - {ativo.name}
                     </li>
-                    <li className="py-2 px-4 hover:bg-gray-100">
-                      <button onClick={handleLogout}>Desconectar</button>
-                    </li>
-                  </ul>
-                )}
+                  ))}
+                </ul>
               </div>
+            )}
+          </div>
+
+          {/* Notificações */}
+          <div className="flex items-end gap-2">
+            <div className="flex flex-col">
+              {notifications.length > 0 && (
+                <span className="w-4 h-4 bg-red-600 rounded-lg text-white font-semibold flex items-center justify-center self-end text-sm translate-y-2">
+                  {notifications.length}
+                </span>
+              )}
+              <button
+                className="bg-[#E1E3E6] items-center rounded-lg py-2 px-2"
+                onClick={toggleNotifications}
+              >
+                <img
+                  className="w-5 h-5"
+                  src="/assets/mensagens.png"
+                  alt="Caixa de entrada"
+                />
+              </button>
             </div>
+
+            {notificationsOpen && (
+              <ul className="absolute right-[10%] top-[8%] mt-2 p-4 w-[30%] bg-white border border-gray-200 rounded shadow z-2">
+                <p className="text-black text-[18px]">Oba! Alerta Novo</p>
+              </ul>
+            )}
+            <div className="flex flex-col">
+              {!true && (
+                <span className="w-4 h-4 bg-red-600 rounded-lg text-white flex items-center justify-center self-end text-sm translate-y-2">
+                  1
+                </span>
+              )}
+
+              <button
+                className="bg-[#E1E3E6] items-center rounded-lg py-2 px-2"
+                onClick={toggleNotifications}
+              >
+                <img
+                  className="w-5 h-5"
+                  src="/assets/notificacoes.png"
+                  alt="Caixa de entrada"
+                />
+              </button>
+            </div>
+
+            {notificationsOpen && (
+              <ul className="absolute right-[10%] top-[8%] mt-2 p-4 w-[30%] bg-white border border-gray-200 rounded shadow z-2">
+                {notifications.map((notification: NotificationProps) => {
+                  return(
+                    <li key={notification.id} className="flex justify-between items-center mt-3 gap-3 cursor-default">
+                      <div className="bg-black w-12 h-12 rounded-full flex items-center justify-center">
+                        <img 
+                          src={`${notification.type === "Contato" ? "/assets/iconContact.png" : "/assets/iconAlert.png"}`} 
+                          alt={`${notification.type === "Contato" ? "Notificação de contato" : "Notificação de alerta"}`} 
+                        />
+                      </div>
+                      <div className="flex-1">
+                        <h3 className="font-bold text-sm">
+                          {notification.type}
+                        </h3>
+                        <div className="bg-black h-[1px] m-[3px]" />
+                        <p className="font-light text-xs">
+                          {notification.content}
+                        </p>
+                      </div>
+                      <div className="flex h-12 justify-start items-start">
+                        <h4 className="font-semibold text-xs">
+                          {notification.date}
+                        </h4>
+                      </div>
+                      
+                    </li>
+                  )
+                })}
+              </ul>
+            )}
+          </div>
+
+          {/* User */}
+          <div className="relative">
+            <button
+              className="bg-[#EDEEF0] flex items-center gap-2 rounded-lg py-2 px-2 justify-end"
+              onClick={toggleUserDropdown}
+            >
+              <img
+                className="w-12 h-12"
+                src="/avatar.png"
+                alt="Foto de perfil"
+              />
+              <h4 className="font-bold">{userName}</h4>
+            </button>
+            {userDropdownOpen && (
+              <ul className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow">
+                <li className="py-2 px-4 hover:bg-gray-100">
+                  <Link to="/meu-perfil">Meu perfil</Link>
+                </li>
+                <li className="py-2 px-4 hover:bg-gray-100">
+                  <button onClick={handleLogout}>Desconectar</button>
+                </li>
+              </ul>
+            )}
           </div>
         </div>
       </header>
 
-      <nav className={`bg-gray-900 text-white py-4 px-6 ${styles.headerMobile}`}>
+      <nav
+        className={`bg-gray-900 text-white py-4 px-6 ${styles.headerMobile}`}
+      >
         <div className="flex justify-between items-center">
           <div>
             <h1 className="text-xl font-bold">Meu Site</h1>
@@ -117,7 +296,11 @@ export const Header = () => {
               onClick={toggleMenu}
               className="focus:outline-none focus:ring-2 focus:ring-white"
             >
-              {isOpen ? <FaTimes className="text-2xl" /> : <FaBars className="text-2xl" />}
+              {isOpen ? (
+                <FaTimes className="text-2xl" />
+              ) : (
+                <FaBars className="text-2xl" />
+              )}
             </button>
           </div>
           <div className="hidden md:block">

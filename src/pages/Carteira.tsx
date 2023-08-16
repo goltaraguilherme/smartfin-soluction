@@ -311,8 +311,6 @@ export default function Carteira() {
 
   return (
     <div className="h-[200vh] bg-[#13141B]">
-      <Header />
-
       {isLoading ? (
         <div className="h-screen flex items-center justify-center">
           <ScaleLoader color="#fff" loading={isLoading} height={60} width={8} radius={4} />
