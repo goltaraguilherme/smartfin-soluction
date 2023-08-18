@@ -1,10 +1,13 @@
 import { useEffect, useState } from "react";
 import axios from 'axios';
-
 import Cookies from "js-cookie";
 import { useNavigate } from "react-router-dom";
+
 import { CardFavoritos } from "../components/Dashboard/CardFavoritos";
 import { CardMain } from "../components/Dashboard/CardMain";
+
+import { ScaleLoader } from 'react-spinners';
+import { useDarkTheme } from "../context/DarkThemeContext";
 
 type AcaoProps = {
   stock: string,
@@ -49,7 +52,6 @@ export type FiiData = {
 export default function Dashboard() {
   const [fiiData, setFiiData] = useState<FiiData[]>([]);
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const [loadingAcoes, setLoadingAcoes] = useState<boolean>(true);
   const storedFilterData = localStorage.getItem("filterData");
   const initialFilterData = storedFilterData
@@ -66,6 +68,8 @@ export default function Dashboard() {
   const [topAcoes, setTopAcoes] = useState<AcaoProps[]>([]);
   const [acoesFiltradas, setAcoesFiltradas] = useState<AcaoProps[]>([]);
   const [acoesFavoritas, setAcoesFavoritas] = useState<AcaoProps[]>([]);
+
+  const { isDark } = useDarkTheme();
   
   const navigate = useNavigate();
 
@@ -97,24 +101,25 @@ export default function Dashboard() {
   }, []);
 
 
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await axios.get(
-          "https://x8ki-letl-twmt.n7.xano.io/api:R98tRgF0:v1/dados_fiis"
-        );
-        setFiiData(response.data);
-      } catch (error) {
-        console.log(error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         "https://x8ki-letl-twmt.n7.xano.io/api:R98tRgF0:v1/dados_fiis"
+  //       );
+  //       setFiiData(response.data);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
 
-    fetchData();
-  }, []);
+  //   fetchData();
+  // }, []);
 
 
   useEffect(() => {
     const fetchAcoes = async () => {
+      setLoadingAcoes(true);
       try {
         const response = await axios.get("https://brapi.dev/api/quote/list?limit=10");
         const acoesData = response.data.stocks;
@@ -146,7 +151,7 @@ export default function Dashboard() {
 
   const handleSubmit = (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    setIsLoading(true);
+    // setIsLoading(true);
   
     setFilterData({
       pvp: filterData.pvp,
@@ -156,7 +161,7 @@ export default function Dashboard() {
     });
   
     // Após o salvamento dos dados, definir isLoading como false
-    setIsLoading(false);
+    // setIsLoading(false);
   
     // Redirecionar para a rota "/fiis/melhoresfiis" com os dados do filtro como parâmetros
     navigate(`/fiis/melhoresfiis/${encodeURIComponent(JSON.stringify(filterData))}`);
@@ -168,179 +173,188 @@ export default function Dashboard() {
   
   return (
     <>
-      <div className="grid grid-cols-9 grid-rows-11 gap-2 h-[100%] w-[100%]">
-        <div className="flex flex-col col-span-9 gap-2 row-span-3 bg-white px-4 py-2 rounded-lg">
-          <div className="flex justify-between">
-            <h3 className="font-semibold text-lg">
-              Favoritados
-            </h3>
-            <button 
-              className="bg-[#0E0E19] rounded-lg p-2"
-              onClick={() => {setIsModalOpen(true)}}>
-              <h4 className="text-white">
-                Editar
-              </h4>
-            </button>
+      {
+        loadingAcoes 
+        ?
+          <div className="flex h-[100%] w-[100%] items-center justify-center dark:bg-[#28292B]">
+            <ScaleLoader  color={`${isDark ? "#EDEEF0" : "#0E0E19"}`} loading={loadingAcoes} height={60} width={8} radius={4} />
           </div>
-          
-          <ul className="flex flex-row gap-3 overflow-auto no-scrollbar">
-            {acoesFavoritas?.length > 0 ?
-                  acoesFavoritas.map((acao:AcaoProps, index) => (
-                      <CardFavoritos acao={acao} key={String(index)} />
-                  ))
-                :
-                <div className="flex flex-col flex-1 items-center justify-center">
-                    <h3 className="font-semibold text-lg">
-                      Você ainda não favoritou nenhuma ação
-                    </h3>
-                    <button
-                      onClick={() => setIsModalOpen(true)} 
-                      className="bg-[#0E0E19] rounded-lg py-2 px-3">
-                      <h3 className="text-white">
-                        Editar ativos favoritos
-                      </h3>
-                    </button>
-                </div>
-            }
-          </ul>
-        </div> 
-        <div className="col-span-5 row-span-4 bg-white px-4 py-3 rounded-lg">
-            <CardMain userName = {userName}/>
-        </div>
-          
-        <div className="col-span-4 row-span-4 bg-white px-4 py-3 rounded-lg max-h-[34vh] overflow-y-scroll no-scrollbar">
-            <h2 className="text-2xl">
-              Últimas Operações
-            </h2>
-            <ul className="mt-2">
-              <li className="flex bg-[#EDEEF0] gap-3 rounded-lg mt-2">
-                <div className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
-                  <img src="/assets/saco-dinheiro.png" alt="Saco de dinheiro" />
-                </div>
-                <p className="flex-1 font-semibold text-sm p-1">
-                  + 150 Ações de Copel (CPLE4) adicionadas a sua carteira de investimentos
-                </p>
-                <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
-                  <img src="/assets/seta-direita.png" alt="Seta para direita" />
+        :
+          <div className="grid grid-cols-9 grid-rows-11 gap-2 h-[100%] w-[100%] dark:bg-[#28292B]">
+            <div className="flex flex-col col-span-9 gap-2 row-span-3 bg-[#FFFFFF] px-4 py-2 rounded-lg dark:bg-[#141414]">
+              <div className="flex justify-between">
+                <h3 className="font-semibold text-lg dark:text-[#EDEEF0]">
+                  Favoritados
+                </h3>
+                <button 
+                  className="bg-[#0E0E19] rounded-lg p-2 dark:bg-[#B1B5B7]"
+                  onClick={() => {setIsModalOpen(true)}}>
+                  <h4 className="text-[#FFFFFF] dark:text-[#28292B]">
+                    Editar
+                  </h4>
                 </button>
-              </li>
-              <li className="flex bg-[#EDEEF0] gap-3 rounded-lg mt-2">
-                <div className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
-                  <img src="/assets/saco-dinheiro.png" alt="Saco de dinheiro" />
-                </div>
-                <p className="flex-1 font-semibold text-sm p-1">
-                  + 150 Ações de Copel (CPLE4) adicionadas a sua carteira de investimentos
-                </p>
-                <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
-                  <img src="/assets/seta-direita.png" alt="Seta para direita" />
-                </button>
-              </li>
-              <li className="flex bg-[#EDEEF0] gap-3 rounded-lg mt-2">
-                <div className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
-                  <img src="/assets/saco-dinheiro.png" alt="Saco de dinheiro" />
-                </div>
-                <p className="flex-1 font-semibold text-sm p-1">
-                  + 150 Ações de Copel (CPLE4) adicionadas a sua carteira de investimentos
-                </p>
-                <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
-                  <img src="/assets/seta-direita.png" alt="Seta para direita" />
-                </button>
-              </li>
-              <li className="flex bg-[#EDEEF0] gap-3 rounded-lg mt-2">
-                <div className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
-                  <img src="/assets/saco-dinheiro.png" alt="Saco de dinheiro" />
-                </div>
-                <p className="flex-1 font-semibold text-sm p-1">
-                  + 150 Ações de Copel (CPLE4) adicionadas a sua carteira de investimentos
-                </p>
-                <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
-                  <img src="/assets/seta-direita.png" alt="Seta para direita" />
-                </button>
-              </li>
-            </ul>
-        </div>
-          
-        <div className="col-span-5 row-span-3 bg-white px-4 py-3 rounded-lg">
-            <h3 className="font-semibold text-base">
-              Maiores altas do dia
-            </h3>
-            <ul className="flex flex-col gap-1">
-              {
-                topAcoes.map((acao, idx) => {
-                  return(
-                    <li key={idx} className="flex items-center bg-[#EDEEF0] rounded-lg p-2">
-                      <div className="flex items-center gap-2 w-[35%]">
-                        <img className="rounded-full h-12 aspect-square" src={acao.logo} alt="Logo" />
-                        <h4 className="font-bold text-base text-[#0E0E19]">
-                          {acao.name}
-                        </h4>
-                      </div>
-                      <h5 className="font-semibold text-sm text-[#96969C] w-[20%]">
-                        {acao.stock}
-                      </h5>
-                      <div className="flex items-center gap-2 w-[20%]">
-                        <div className={`py-1 px-3 rounded-lg ${Number(acao.change) >= 0 ? "bg-[#5DDF52]": "bg-[#FF2727]"}`}>
-                          <img className={`${Number(acao.change) < 0 && "rotate-90"}`}
-                            src="/assets/seta-subida.png" 
-                            alt="Seta de crescimento" />
-                        </div>
-                        <p className={`font-semibold ${Number(acao.change) >= 0 ? "text-[#5DDF52]": "text-[#FF2727]"}`}>
-                          {Number(acao.change) > 0 && ("+")}{Number(acao.change).toFixed(2)}%
-                        </p>
-                      </div>
-                      <h4 className="font-bold text-base text-[#0E0E19]">
-                        DY:
-                      </h4>
-                    </li>
-                  )
-                })
-              }
-            </ul>
-        </div>
-          
-        <div className="flex col-span-4 row-span-3 gap-2 bg-white px-4 py-3 rounded-lg">
-            <div className="flex-1">
-              <div className="w-[100%]">
-                <h2 className="font-semibold text-2xl text-[#1C1D1F]">
-                  Performance de Carteira
-                </h2>
               </div>
-
-              <div className="flex flex-1 gap-2 h-[86%]">
-                <div className="flex flex-col flex-1 justify-between">
-                  <div className="flex flex-col flex-1 gap-3 mt-2 justify-center">
-                    <h6 className="text-[#595959]">
-                      Muito bom! continue
-                    </h6>
-                    <div className="flex bg-[#28292B] w-[50%] py-1 px-2 rounded-lg items-center justify-center gap-2">
-                      <img src="/assets/seta-subida.png" alt="" />
-                      <h4 className="text-[#5DDF52]">
-                        +16,5%
-                      </h4>
+              
+              <ul className="flex flex-row gap-3 overflow-auto no-scrollbar">
+                {acoesFavoritas?.length > 0 ?
+                      acoesFavoritas.map((acao:AcaoProps, index) => (
+                          <CardFavoritos acao={acao} key={String(index)} />
+                      ))
+                    :
+                    <div className="flex flex-col flex-1 items-center justify-center">
+                        <h3 className="font-semibold text-lg">
+                          Você ainda não favoritou nenhuma ação
+                        </h3>
+                        <button
+                          onClick={() => setIsModalOpen(true)} 
+                          className="bg-[#0E0E19] rounded-lg py-2 px-3">
+                          <h3 className="text-[#FFFFFF]">
+                            Editar ativos favoritos
+                          </h3>
+                        </button>
                     </div>
-                    <h6 className="text-[#595959]">
-                      Desempenho em<br/> ganho de ações
-                    </h6>
-                  </div>
-                  <div className="flex gap-2 flex-1 items-end">
-                    <div className="bg-[#058FF233] flex-1 h-[40%]  rounded-lg"/>
-                    <div className="bg-[#058FF266] flex-1 h-[70%] rounded-lg"/>
-                  </div>
-                </div>
-                <div className="flex flex-1 gap-2 items-end">
-                  <div className="bg-[#058FF299] flex-1 h-[50%] rounded-lg"/>
-                  <div className="bg-[#058FF2CC] flex-1 h-[70%] rounded-lg"/>
-                </div>
-              </div>
+                }
+              </ul>
+            </div> 
+            <div className="col-span-5 row-span-4 bg-[#FFFFFF]  px-4 py-3 rounded-lg dark:bg-[#141414]">
+                <CardMain userName = {userName}/>
             </div>
+              
+            <div className="col-span-4 row-span-4 bg-[#FFFFFF] px-4 py-3 rounded-lg overflow-y-scroll no-scrollbar dark:bg-[#141414]">
+                <h2 className="text-2xl dark:text-[#EDEEF0]">
+                  Últimas Operações
+                </h2>
+                <ul className="mt-2">
+                  <li className="flex bg-[#EDEEF0] gap-3 rounded-lg mt-2">
+                    <div className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
+                      <img src="/assets/saco-dinheiro.png" alt="Saco de dinheiro" />
+                    </div>
+                    <p className="flex-1 font-semibold text-sm p-1">
+                      + 150 Ações de Copel (CPLE4) adicionadas a sua carteira de investimentos
+                    </p>
+                    <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
+                      <img src="/assets/seta-direita.png" alt="Seta para direita" />
+                    </button>
+                  </li>
+                  <li className="flex bg-[#EDEEF0] gap-3 rounded-lg mt-2">
+                    <div className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
+                      <img src="/assets/saco-dinheiro.png" alt="Saco de dinheiro" />
+                    </div>
+                    <p className="flex-1 font-semibold text-sm p-1">
+                      + 150 Ações de Copel (CPLE4) adicionadas a sua carteira de investimentos
+                    </p>
+                    <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
+                      <img src="/assets/seta-direita.png" alt="Seta para direita" />
+                    </button>
+                  </li>
+                  <li className="flex bg-[#EDEEF0] gap-3 rounded-lg mt-2">
+                    <div className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
+                      <img src="/assets/saco-dinheiro.png" alt="Saco de dinheiro" />
+                    </div>
+                    <p className="flex-1 font-semibold text-sm p-1">
+                      + 150 Ações de Copel (CPLE4) adicionadas a sua carteira de investimentos
+                    </p>
+                    <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
+                      <img src="/assets/seta-direita.png" alt="Seta para direita" />
+                    </button>
+                  </li>
+                  <li className="flex bg-[#EDEEF0] gap-3 rounded-lg mt-2">
+                    <div className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
+                      <img src="/assets/saco-dinheiro.png" alt="Saco de dinheiro" />
+                    </div>
+                    <p className="flex-1 font-semibold text-sm p-1">
+                      + 150 Ações de Copel (CPLE4) adicionadas a sua carteira de investimentos
+                    </p>
+                    <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[8%] aspect-square items-center justify-center">
+                      <img src="/assets/seta-direita.png" alt="Seta para direita" />
+                    </button>
+                  </li>
+                </ul>
+            </div>
+              
+            <div className="col-span-5 row-span-3 bg-[#FFFFFF] px-4 py-3 rounded-lg dark:bg-[#141414]">
+                <h3 className="font-semibold text-base dark:text-[#EDEEF0]">
+                  Maiores altas do dia
+                </h3>
+                <ul className="flex flex-col gap-1">
+                  {
+                    topAcoes.map((acao, idx) => {
+                      return(
+                        <li key={idx} className="flex items-center bg-[#EDEEF0] rounded-lg p-2 dark:bg-[#28292B]">
+                          <div className="flex items-center gap-2 w-[35%]">
+                            <img className="rounded-full h-12 aspect-square" src={acao.logo} alt="Logo" />
+                            <h4 className="font-bold text-base text-[#0E0E19] dark:text-[#EDEEF0]">
+                              {acao.name}
+                            </h4>
+                          </div>
+                          <h5 className="font-semibold text-sm text-[#96969C] w-[20%]">
+                            {acao.stock}
+                          </h5>
+                          <div className="flex items-center gap-2 w-[20%]">
+                            <div className={`py-1 px-3 rounded-lg ${Number(acao.change) >= 0 ? "bg-[#5DDF52]": "bg-[#FF2727]"}`}>
+                              <img className={`${Number(acao.change) < 0 && "rotate-90"}`}
+                                src="/assets/seta-subida.png" 
+                                alt="Seta de crescimento" />
+                            </div>
+                            <p className={`font-semibold ${Number(acao.change) >= 0 ? "text-[#5DDF52]": "text-[#FF2727]"}`}>
+                              {Number(acao.change) > 0 && ("+")}{Number(acao.change).toFixed(2)}%
+                            </p>
+                          </div>
+                          <h4 className="font-bold text-base text-[#0E0E19] dark:text-[#EDEEF0]">
+                            DY:
+                          </h4>
+                        </li>
+                      )
+                    })
+                  }
+                </ul>
+            </div>
+              
+            <div className="flex col-span-4 row-span-3 gap-2 bg-[#FFFFFF] px-4 py-3 rounded-lg hover:cursor-pointer dark:bg-[#141414]" onClick={() => navigate("/carteira")}>
+                <div className="flex-1">
+                  <div className="w-[100%]">
+                    <h2 className="font-semibold text-2xl text-[#1C1D1F] dark:text-[#EDEEF0]">
+                      Performance de Carteira
+                    </h2>
+                  </div>
 
-            <div className="bg-[#058FF2] w-[18%] rounded-lg" />
-        </div>
-      </div>
+                  <div className="flex flex-1 gap-2 h-[86%]">
+                    <div className="flex flex-col flex-1 justify-between">
+                      <div className="flex flex-col flex-1 gap-3 mt-2 justify-center">
+                        <h6 className="text-[#595959] dark:text-[#EDEEF0]">
+                          Muito bom! continue
+                        </h6>
+                        <div className="flex bg-[#28292B] w-[50%] py-1 px-2 rounded-lg items-center justify-center gap-2">
+                          <img src="/assets/seta-subida.png" alt="" />
+                          <h4 className="text-[#5DDF52]">
+                            +16,5%
+                          </h4>
+                        </div>
+                        <h6 className="text-[#595959] dark:text-[#EDEEF0]">
+                          Desempenho em<br/> ganho de ações
+                        </h6>
+                      </div>
+                      <div className="flex gap-2 flex-1 items-end">
+                        <div className="bg-[#058FF233] flex-1 h-[40%]  rounded-lg"/>
+                        <div className="bg-[#058FF266] flex-1 h-[70%] rounded-lg"/>
+                      </div>
+                    </div>
+                    <div className="flex flex-1 gap-2 items-end">
+                      <div className="bg-[#058FF299] flex-1 h-[50%] rounded-lg"/>
+                      <div className="bg-[#058FF2CC] flex-1 h-[70%] rounded-lg"/>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-[#058FF2] w-[18%] rounded-lg" />
+            </div>
+          </div>
+      }
+ 
 
       {
         isModalOpen &&
-          <div className={`fixed inset-0  flex items-center justify-center bg-black bg-opacity-75 translate-y-[0%] z-10`}>
+          <div className={`fixed inset-0  flex items-center justify-center bg-[#000000] bg-opacity-75 translate-y-[0%] z-10`}>
             <div className={`bg-[#EDEEF0] rounded-lg w-[40%] h-[70%] p-4 overflow-scroll no-scrollbar`}>
               <div className="flex items-center justify-center">
                 <button onClick={() => {
