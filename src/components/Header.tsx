@@ -5,6 +5,7 @@ import axios from 'axios';
 import styles from './Dashboard/Header.module.css';
 import Cookies from 'js-cookie';
 import { useAuth } from '../context/AuthContext';
+import { useDarkTheme } from '../context/DarkThemeContext';
 
 type AtivoProps = {
   stock: string,
@@ -72,13 +73,15 @@ export const Header = () => {
   const [notificationsOpen, setNotificationsOpen] = useState<boolean>(false);
   const [notificationsList, setNotifications] = useState<Array<NotificationProps>>(notifications);
   const [userDropdownOpen, setUserDropdownOpen] = useState<boolean>(false);
+  const [switchToggleDarkMode, setSwitchToggleDarkMode] = useState<boolean>(false);
+  const [darkToggle, setDarkToggle] = useState<boolean>(false)
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [userName, setUserName] = useState<string>();
   const [inputText, setInputText] = useState<string>("");
   const [sugestoesAtivos, setSugestoesAtivos] = useState<AtivoProps[]>()
   const debounceQuery = useDebounceValue(inputText);
 
-  const { logout } = useAuth();
+  const { isDark, toggleDarkMode } = useDarkTheme();
 
   let location = useLocation();
 
@@ -139,21 +142,19 @@ export const Header = () => {
   }, [debounceQuery]);
 
   return (
-    <>
-      <header
-        className={`bg-white flex h-[9vh] w-[100%] ${styles.headerDesktop}`}
-      >
+    <div className={`${isDark && 'dark'}`}>
+      <header className={`bg-[#ffffff] flex h-[9vh] w-[100%] dark:bg-[#1C1D1F] ${styles.headerDesktop}`}>
         <div className="flex items-center justify-between w-[100%] px-6">
           <div className="flex w-[15%] justify-center items-center">
-            <h4 className="font-bold text-lg capitalize">{location.pathname.split('/').slice(1)[0]}</h4>
+            <h4 className="font-bold text-lg capitalize dark:text-[#EDEEF0]">{location.pathname.split('/').slice(1)[0]}</h4>
           </div>
 
           {/* Input */}
-          <div className="w-[40%] flex flex-col">
-            <div className="bg-[#E1E3E6] flex items-center py-2 px-3 rounded-lg">
+          <div className="w-[35%] flex flex-col">
+            <div className="bg-[#E1E3E6] flex items-center py-2 px-3 rounded-lg dark:bg-[#5E5F64]">
               <img className="w-7 h-7" src="/assets/Search.png" alt="Buscar" />
               <input
-                className="bg-transparent w-[100%] ml-2 text-[#5E5F64] placeholder-[#5E5F64] outline-none text-sm"
+                className="bg-transparent w-[100%] ml-2 text-[#5E5F64] outline-none text-sm placeholder:text-[#5E5F64] dark:placeholder:text-[#EDEEF0] dark:text-[#EDEEF0]"
                 type="text"
                 placeholder="Pesquise por uma ação"
                 onChange={(e) => setInputText(e.target.value)}
@@ -189,7 +190,7 @@ export const Header = () => {
                 </span>
               )}
               <button
-                className="bg-[#E1E3E6] items-center rounded-lg py-2 px-2"
+                className="bg-[#E1E3E6] items-center rounded-lg py-2 px-2 dark:bg-[#5E5F64]"
                 onClick={toggleNotifications}
               >
                 <img
@@ -213,7 +214,7 @@ export const Header = () => {
               )}
 
               <button
-                className="bg-[#E1E3E6] items-center rounded-lg py-2 px-2"
+                className="bg-[#E1E3E6] items-center rounded-lg py-2 px-2 dark:bg-[#5E5F64]"
                 onClick={toggleNotifications}
               >
                 <img
@@ -257,10 +258,25 @@ export const Header = () => {
             )}
           </div>
 
+          <div>
+            <button 
+              className={`flex p-1 ml-4 self-center w-14 rounded-3xl items-center ${isDark ? "bg-[#141414]" : "bg-[#EDEEF0]"} duration-200`}
+              onClick={() => {
+                toggleDarkMode()
+                setDarkToggle(!darkToggle)
+                localStorage.setItem("darkMode", JSON.stringify(!darkToggle))
+                setSwitchToggleDarkMode(!switchToggleDarkMode)}}
+                >
+              <div className={`flex justify-center items-center h-6 w-6 rounded-full ${isDark ? "translate-x-full bg-[#EDEEF0]" : "justify-start bg-[#28292B]"} duration-200`}>
+                <img src={`${isDark ? "/assets/moon.png" : "/assets/sun.png"}`} alt="Alterar tema" />
+              </div>
+            </button>
+          </div>
+
           {/* User */}
           <div className="relative">
             <button
-              className="bg-[#EDEEF0] flex items-center gap-2 rounded-lg py-2 px-2 justify-end"
+              className="bg-[#EDEEF0] flex items-center gap-2 rounded-lg py-2 px-2 justify-end dark:bg-[#5E5F64]"
               onClick={toggleUserDropdown}
             >
               <img
@@ -268,7 +284,7 @@ export const Header = () => {
                 src="/avatar.png"
                 alt="Foto de perfil"
               />
-              <h4 className="font-bold">{userName}</h4>
+              <h4 className="font-bold dark:text-[#EDEEF0]">{userName}</h4>
             </button>
             {userDropdownOpen && (
               <ul className="absolute right-0 mt-2 w-48 bg-white border border-gray-200 rounded shadow">
@@ -355,6 +371,6 @@ export const Header = () => {
           </div>
         )}
       </nav>
-    </>
+    </div>
   );
 };
