@@ -7,8 +7,11 @@ type ComponentProps = {
 }
 
 export function CardMain({userName}: ComponentProps){
+    const [mouseOverRenda1, setMouseOverRenda1] = useState<boolean>(false);
+    const [mouseOverRenda2, setMouseOverRenda2] = useState<boolean>(false);
+    const [mouseOverRenda3, setMouseOverRenda3] = useState<boolean>(false);
     const [optionSelected, setOptionSelected] = useState<string>('1');
-    const [optionsChart, setOptionsChart] = useState({
+    let optionsChart = {
         chart: {
             height: 500,
             // color: 
@@ -30,22 +33,22 @@ export function CardMain({userName}: ComponentProps){
             },
           },
           colors: ["#e7a86d"]
-    })
-    const [series, setSeries] = useState([
+    }
+    let series = [
             {
               name: "series-1",
               data: [31, 40, 28, 51, 42, 109, 100]
             }
-          ])
+          ]
 
     return (
       <>
         {optionSelected == "1" ? (
-          <div>
+          <div className="dark:bg-[#141414]">
             <div className="flex justify-between">
               <div className="flex flex-col justify-evenly items-start">
-                <h1 className="font-medium text-4xl">Bem-vindo, {userName}</h1>
-                <h2 className="font-medium text-xl text-[#5E5F64]">
+                <h1 className="font-medium text-4xl dark:text-[#EDEEF0]">Bem-vindo, {userName}</h1>
+                <h2 className="font-medium text-xl text-[#5E5F64] dark:text-[#B1B5B7]">
                   Veja sua carteira
                 </h2>
               </div>
@@ -54,7 +57,7 @@ export function CardMain({userName}: ComponentProps){
                 <div className="flex bg-[#D9D9D9] items-center p-1 rounded-lg w-[60%]">
                   <button
                     className={`flex flex-1 items-center justify-center p-1 rounded-lg ${
-                      optionSelected == "1" && "bg-white"
+                      optionSelected == "1" && "bg-[#FFFFFF]"
                     }`}
                     onClick={() => setOptionSelected("1")}
                   >
@@ -74,13 +77,55 @@ export function CardMain({userName}: ComponentProps){
             </div>
 
             <div className="flex flex-col gap-2 mt-2">
-              <h1 className="font-medium text-3xl">R$999.999,99</h1>
+              <h1 className="font-medium text-3xl dark:text-[#EDEEF0]">R$999.999,99</h1>
               <div className="flex gap-1 w-[100%] h-3">
-                <div className="rounded-lg bg-green-600 w-[60%]" />
-                <div className="rounded-lg bg-yellow-600  w-[30%]" />
-                <div className="rounded-lg bg-blue-600  w-[10%]" />
+                <div className="flex flex-col w-[60%] items-center">
+                  {mouseOverRenda1 && (
+                    <div className="absolute mt-3 flex flex-col items-center shadow">
+                      <div className=" bg-[#000000] h-3 w-3 rotate-45 translate-y-2 dark:bg-[#EDEEF0]" />
+                      <div className=" bg-[#000000] rounded-lg items-center justify-center py-2 px-3 text-[#FFFFFF] dark:bg-[#EDEEF0] dark:text-[#141414]">
+                        Renda 1
+                      </div>
+                    </div>
+                  )}
+                  <div
+                    className="rounded-lg w-[100%] flex-1 bg-green-600"
+                    onMouseEnter={() => setMouseOverRenda1(true)}
+                    onMouseLeave={() => setMouseOverRenda1(false)}
+                  />
+                </div>
+                <div className="flex flex-col w-[30%] items-center">
+                  {mouseOverRenda2 && (
+                    <div className="absolute mt-3 flex flex-col items-center shadow">
+                      <div className=" bg-[#000000] h-3 w-3 rotate-45 translate-y-2 dark:bg-[#EDEEF0]" />
+                      <div className=" bg-[#000000] rounded-lg items-center justify-center py-2 px-3 text-[#FFFFFF] dark:bg-[#EDEEF0] dark:text-[#141414]">
+                        Renda 2
+                      </div>
+                    </div>
+                  )}
+                  <div
+                    className="rounded-lg w-[100%] flex-1 bg-yellow-600"
+                    onMouseEnter={() => setMouseOverRenda2(true)}
+                    onMouseLeave={() => setMouseOverRenda2(false)}
+                  />
+                </div>
+                <div className="flex flex-col w-[10%] items-center">
+                  {mouseOverRenda3 && (
+                    <div className="absolute mt-3 flex flex-col items-center shadow">
+                      <div className=" bg-[#000000] h-3 w-3 rotate-45 translate-y-2 dark:bg-[#EDEEF0]" />
+                      <div className=" bg-[#000000] rounded-lg items-center justify-center py-2 px-3 text-[#FFFFFF] dark:bg-[#EDEEF0] dark:text-[#141414]">
+                        Renda 3
+                      </div>
+                    </div>
+                  )}
+                  <div
+                    className="rounded-lg w-[100%] flex-1 bg-blue-600"
+                    onMouseEnter={() => setMouseOverRenda3(true)}
+                    onMouseLeave={() => setMouseOverRenda3(false)}
+                  />
+                </div>
               </div>
-              <p>Continue investindo, realize o seu sonho</p>
+              <p className="dark:text-[#B1B5B7]">Continue investindo, realize o seu sonho</p>
             </div>
           </div>
         ) : (
@@ -93,14 +138,14 @@ export function CardMain({userName}: ComponentProps){
               <div className="flex bg-[#D9D9D9] items-center p-1 rounded-lg">
                 <button
                   className={`flex flex-1 items-center justify-center py-1 px-2 aspect-square rounded-lg ${
-                    optionSelected == "1" && "bg-white"
+                    optionSelected == "1" && "bg-[#FFFFFF]"
                   }`}
                   onClick={() => setOptionSelected("1")}
                 >
                   <p>1</p>
                 </button>
                 <button
-                  className={`flex flex-1 items-center justify-center py-1 px-2 rounded-lg aspect-square bg-white`}
+                  className={`flex flex-1 items-center justify-center py-1 px-2 rounded-lg aspect-square bg-[#FFFFFF]`}
                   onClick={() => setOptionSelected("2")}
                 >
                   <p>2</p>
@@ -108,13 +153,14 @@ export function CardMain({userName}: ComponentProps){
               </div>
             </div>
             <div className="flex-1">
-                <Chart
+              <Chart
+                // @ts-ignore
                 options={optionsChart}
                 series={series}
                 type="area"
                 width="100%"
                 height="150"
-                />
+              />
             </div>
           </div>
         )}
