@@ -8,7 +8,7 @@
   box-sizing: border-box;
 }
 
-input, textarea, h1,h2,h3,h4,h5,h6, p, li {
+input, textarea, h1,h2,h3,h4,h5,h6, p, li, th, td {
   font-family: 'Poppins', sans-serif;
 }
 

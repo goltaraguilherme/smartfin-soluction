@@ -10,6 +10,16 @@ import ReactApexChart from 'react-apexcharts';
 import { css } from '@emotion/react';
 import { ScaleLoader } from 'react-spinners';
 import { FaTrash, FaEdit } from 'react-icons/fa';
+import { useDarkTheme } from '../context/DarkThemeContext';
+
+type AcaoProps = {
+  stock: string,
+  logo: string,
+  name: string,
+  change: string,
+  volume: string,
+  sector: null | string
+}
 
 interface StockData {
   stock: string;
@@ -54,6 +64,62 @@ export default function Carteira() {
   const [patrimonioTotal, setPatrimonioTotal] = useState(0);
   const [rentabilidade, setRentabilidade] = useState<RentabilidadeData[]>([]);
   const [isLoading, setIsLoading] = useState(true);
+  const [acoes, setAcoes] = useState<AcaoProps[]>([]);
+  const [topAcoes, setTopAcoes] = useState<AcaoProps[]>([]);
+  const [acoesFiltradas, setAcoesFiltradas] = useState<AcaoProps[]>([]);
+  const [acoesFavoritas, setAcoesFavoritas] = useState<AcaoProps[]>([]);
+
+  const { isDark } = useDarkTheme();
+  
+
+  useEffect(() => {
+    let acoesFavoritasSalvas = localStorage.getItem("acoesFavoritas")!
+    if (acoesFavoritasSalvas) setAcoesFavoritas(JSON.parse(acoesFavoritasSalvas))
+    
+  }, []);
+
+
+  // useEffect(() => {
+  //   const fetchData = async () => {
+  //     try {
+  //       const response = await axios.get(
+  //         "https://x8ki-letl-twmt.n7.xano.io/api:R98tRgF0:v1/dados_fiis"
+  //       );
+  //       setFiiData(response.data);
+  //     } catch (error) {
+  //       console.log(error);
+  //     }
+  //   };
+
+  //   fetchData();
+  // }, []);
+
+
+  useEffect(() => {
+    const fetchAcoes = async () => {
+      try {
+        const response = await axios.get("https://brapi.dev/api/quote/list?limit=10");
+        const acoesData = response.data.stocks;
+        setAcoes(acoesData);
+
+        let topAcoes = acoesData.sort((a: any, b: any) => {
+          if(Number(a.change) > Number(b.change)) return -1
+          else return 1
+        }).slice(0,5)
+
+        setAcoesFiltradas(acoesData)
+
+        setTopAcoes(topAcoes)
+
+      } catch (error) {
+        console.log(error);
+      }
+    };
+
+    fetchAcoes();
+    
+    console.log(acoes)
+  }, []);
 
   useEffect(() => {
     const calcularRentabilidade = async () => {
@@ -310,224 +376,186 @@ export default function Carteira() {
   }, [successAlert, errorAlert]);
 
   return (
-    <div className="h-[200vh] bg-[#13141B]">
+    <>
       {isLoading ? (
-        <div className="h-screen flex items-center justify-center">
-          <ScaleLoader color="#fff" loading={isLoading} height={60} width={8} radius={4} />
+        <div className="flex h-[100%] w-[100%] items-center justify-center dark:bg-[#28292B]">
+          <ScaleLoader
+            color={`${isDark ? "#EDEEF0" : "#0E0E19"}`}
+            loading={isLoading}
+            height={60}
+            width={8}
+            radius={4}
+          />
         </div>
       ) : (
-        <div className="m-16 rounded p-16 bg-[#201F25]">
-          <div className="container-fluid">
-            <div className="row">
-              <div className="col-lg-6">
-                <h1 className="text-white mb-3 text-3xl font-bold">Carteira</h1>
-              </div>
-              <div className="col-lg-6">
-                <div className="flex justify-end">
-                  <button
-                    className="bg-blue-500 text-white p-2 rounded"
-                    onClick={handleOpenModal}
-                  >
-                    Adicionar ativo
-                  </button>
-                </div>
-              </div>
-            </div>
-            <div className="row">
-              <div className="col-lg-3">
-                <CardMenu />
-              </div>
-              <div className="col-lg-9">
-                <div className="row">
-                  <div className="col-lg-6">
-                    <div>
-                      <div className="border border-gray-300 rounded h-[70vh] mt-0 p-4 relative">
-                        <h2 className="text-white mb-3 text-2xl">Patrimônio</h2>
-                        <ReactApexChart
-                          options={options}
-                          series={series}
-                          type="pie"
-                          height={350}
-                        />
-
-                        <p className="text-white text-xl mt-4">
-                          Patrimônio Total: {patrimonioTotalFormatted}
-                        </p>
-                        <p className="text-white text-xl mt-4">
-                          Rentabilidade Total: {rentabilidadeTotal.toFixed(2)}%
-                        </p>
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-lg-6">
-                    <div className="border border-gray-300 rounded h-[70vh] mt-0 p-4 relative">
-                      <h3 className="text-white text-2xl font-medium py-2 px-4 mb-4 sticky top-0 z-10">
-                        Meus Ativos
-                      </h3>
-                      <div className="h-[calc(100%-5rem)] overflow-y-auto custom-scroll">
-                        {ativos.map((ativo, index) => (
-                          <div
-                            key={index}
-                            className="bg-gray-800 p-6 m-4 rounded-md mb-4"
-                          >
-                            <div className="flex items-center justify-between">
-                              <h4 className="text-white text-lg font-medium text-[20px]">
-                                {ativo.nomeAtivo}
-                              </h4>
-                              <div>
-                                <button
-                                  className="text-green-400 mr-2"
-                                  onClick={() => handleEditAtivo(ativo.id)}
-                                >
-                                  <FaEdit />
-                                </button>
-                                <button
-                                  className="text-red-500"
-                                  onClick={() => handleDeleteAtivo(ativo.id)}
-                                >
-                                  <FaTrash />
-                                </button>
-                              </div>
-                            </div>
-                            <p className="text-gray-200 text-[18px]">
-                              {ativo.quantidadeAtivos} ativos
-                            </p>
-                            <p className="text-green-400 font-semibold">
-                              Comprou por R${ativo.valorAtivo}
-                            </p>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  </div>
-                  <div className="col-lg-12">
-                    <div className="border border-gray-300 rounded h-[60vh] mt-5 p-4 relative h-[calc(100%-5rem)] overflow-y-auto custom-scroll">
-                      <h3 className="text-[20px] text-white">Rentabilidade</h3>
-                      {rentabilidade.map((ativo) => (
-                        <div
-                          key={ativo.stock}
-                          className="bg-gray-800 p-6 m-4 rounded-md mb-4 "
-                        >
-                          <p className="text-white text-[20px] font-bold">{ativo.stock}</p>
-                          <p className='text-white text-[18px]'>Valor de Compra: R${ativo.valorCompra}</p>
-                          <p className='text-green-400'>
-                            Rentabilidade (%): {ativo.rentabilidadePorcentagem.toFixed(2)}
-                          </p>
-                          <p className='text-green-400'>
-                            Rentabilidade (Valor): R${ativo.rentabilidadeValor.toFixed(2)}
-                          </p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+        <div className="grid grid-cols-9 grid-rows-11 gap-2 h-[100%] w-[100%]">
+          <div className="col-span-4 row-span-6 bg-[#FFFFFF] rounded-lg px-4 py-2 dark:bg-[#141414]">
+            <h3 className="font-semibold text-lg dark:text-[#EDEEF0]">Patrimônio</h3>
           </div>
-        </div>
-      )}
 
-      {isModalOpen && (
-        <div className="fixed inset-0 bg-black bg-opacity-75 flex items-center justify-center">
-          <div className="bg-white rounded-lg p-8">
-            <h2 className="text-xl font-bold mb-4">
-              {editingAtivoId ? 'Editar Ativo' : 'Adicionar Ativo'}
-            </h2>
-            <form onSubmit={editingAtivoId ? () => handleUpdateAtivo(editingAtivoId) : handleAddAtivo}>
-              <div className="mb-4">
-                <label htmlFor="nome-ativo" className="block text-gray-700">
-                  Nome do Ativo
-                </label>
-                <input
-                  id="nome-ativo"
-                  type="text"
-                  className="border border-gray-300 px-4 py-2 mt-1 block w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={nomeAtivo}
-                  onChange={(e) => setNomeAtivo(e.target.value)}
-                  required
-                />
-              </div>
-              {sugestoesAtivos.length > 0 && (
-                <div className="mb-4">
-                  <ul className="mt-2">
-                    {sugestoesAtivos.slice(0, 10).map((ativo) => (
-                      <li
-                        key={ativo.stock}
-                        className="cursor-pointer text-gray-700 hover:bg-gray-200 px-4 py-2 rounded-md"
-                        onClick={() => {
-                          setNomeAtivo(ativo.stock);
-                          setSugestoesAtivos([]);
-                        }}
-                      >
-                        {ativo.stock} - {ativo.name}
-                      </li>
-                    ))}
-                  </ul>
+          <div className="col-span-5 row-span-6 bg-[#FFFFFF] rounded-lg px-4 py-2 overflow-auto no-scrollbar dark:bg-[#141414]">
+            <table className="min-w-full">
+              <thead>
+                <tr>
+                  <th scope="col" className="font-semibold text-xl w-[25%] dark:text-[#EDEEF0]">Meus Ativos</th>
+                  <th scope="col" className="w-[15%] dark:text-[#EDEEF0]"> </th>
+                  <th scope="col" className="text-center w-[13%] dark:text-[#EDEEF0]">Qtde</th>
+                  <th scope="col" className="text-center w-[12%] dark:text-[#EDEEF0]">P.Médio</th>
+                  <th scope="col" className="text-center w-[12%] dark:text-[#EDEEF0]">Preço</th>
+                  <th scope="col" className="text-center w-[12%] dark:text-[#EDEEF0]">Retorno</th>
+                  <th scope="col" className="text-center w-[11%] dark:text-[#EDEEF0]">% Na<br/> Carteira</th>
+                </tr>
+              </thead>
+            </table>
+            <tbody className="flex flex-col gap-2">
+              {topAcoes.map((acao) => {
+                return (
+                  <tr className="flex bg-[#EDEEF0] rounded-lg p-2 dark:bg-[#28292B]">
+                    <td className="flex items-center gap-3 w-[25%]">
+                      <img
+                        className="rounded-full h-12 aspect-square"
+                        src={acao.logo}
+                        alt="Logo"
+                      />
+                      <div>
+                        <h4 className="font-bold text-base text-[#0E0E19] dark:text-[#EDEEF0]">
+                          {acao.name}
+                        </h4>
+                        <h5 className="text-sm text-[#96969C] dark:text-[#EDEEF0]">{acao.stock}</h5>
+                      </div>
+                    </td>
+                    <td className="flex items-center w-[18%]">
+                      <div className="flex items-center gap-2">
+                        <div
+                          className={`py-1 px-3 rounded-lg ${
+                            Number(acao.change) >= 0
+                              ? "bg-[#5DDF52]"
+                              : "bg-[#FF2727]"
+                          }`}
+                        >
+                          <img
+                            className={`${
+                              Number(acao.change) < 0 && "rotate-90"
+                            }`}
+                            src="/assets/seta-subida.png"
+                            alt="Seta de crescimento"
+                          />
+                        </div>
+                        <p
+                          className={`font-semibold ${
+                            Number(acao.change) >= 0
+                              ? "text-[#5DDF52]"
+                              : "text-[#FF2727]"
+                          }`}
+                        >
+                          {Number(acao.change) > 0 && "+"}
+                          {Number(acao.change).toFixed(2)}%
+                        </p>
+                      </div>
+                    </td>
+                    <td className="text-center my-auto w-[13%] dark:text-[#EDEEF0]">99999</td>
+                    <td className="text-center my-auto w-[12%] dark:text-[#EDEEF0]">30,28</td>
+                    <td className="text-center my-auto w-[12%] dark:text-[#EDEEF0]">31,29</td>
+                    <td className="text-center my-auto w-[12%] text-[#5DDF52]">12,20%</td>
+                    <td className="text-center my-auto w-[11%] dark:text-[#EDEEF0]">5,8%</td>
+                  </tr>
+                );
+              })}
+            </tbody>
+          </div>
+
+          <div className="col-span-6 row-span-5 bg-[#FFFFFF] rounded-lg px-4 py-2 dark:bg-[#141414]">
+            <h3 className="font-semibold text-lg dark:text-[#EDEEF0]">Performance de Carteira</h3>
+          </div>
+
+          <div className="flex flex-col col-span-3 gap-2 row-span-5 rounded-lg">
+            <div className="bg-[#FFFFFF] flex-1  rounded-lg px-4 py-2 dark:bg-[#141414]">
+              <div className="flex bg-[#EDEEF0] gap-3 rounded-lg dark:bg-[#28292B]">
+                <div className="flex bg-[#1C1D1F] rounded-lg p-2 aspect-square items-center justify-center">
+                  <img
+                    className="h-[80%]"
+                    src="/assets/import-wallet.png"
+                    alt="Ícone importar B3"
+                  />
                 </div>
-              )}
-              <div className="mb-4">
-                {stockPrice !== null && (
-                  <p className="text-gray-400 mt-2">
-                    Preço da Ação: {stockPrice}
-                  </p>
-                )}
-              </div>
-              <div className="mb-4">
-                <label htmlFor="quantidade-ativos" className="block text-gray-700">
-                  Quantidade de Ativos
-                </label>
-                <input
-                  id="quantidade-ativos"
-                  type="number"
-                  className="border border-gray-300 px-4 py-2 mt-1 block w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={quantidadeAtivos}
-                  onChange={(e) => setQuantidadeAtivos(Number(e.target.value))}
-                  required
-                />
-              </div>
-              <div className="mb-4">
-                <label htmlFor="valor-ativo" className="block text-gray-700">
-                  Valor do Ativo
-                </label>
-                <input
-                  id="valor-ativo"
-                  type="text"
-                  className="border border-gray-300 px-4 py-2 mt-1 block w-full rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  value={valorAtivo}
-                  onChange={(e) => setValorAtivo(e.target.value)}
-                  required
-                />
-              </div>
-              <div className="flex justify-end">
-                <button
-                  className="bg-blue-500 text-white px-4 py-2 rounded-md mr-2"
-                  type="submit"
-                >
-                  {editingAtivoId ? 'Atualizar' : 'Adicionar'}
-                </button>
-                <button
-                  className="bg-gray-300 text-white px-4 py-2 rounded-md"
-                  onClick={handleCloseModal}
-                >
-                  Cancelar
+                <div className="flex flex-col flex-1 p-2 justify-center">
+                  <h3 className='dark:text-[#EDEEF0]'>Importação</h3>
+                  <h2 className="font-bold text-xl dark:text-[#EDEEF0]">Investidor.B3</h2>
+                </div>
+                <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[13%] aspect-square items-center justify-center">
+                  <img src="/assets/seta-direita.png" alt="Seta para direita" />
                 </button>
               </div>
-            </form>
+            </div>
+            <div className="bg-[#FFFFFF] flex-1 rounded-lg px-4 py-2 dark:bg-[#141414]">
+              <div className="flex bg-[#EDEEF0] gap-3 rounded-lg dark:bg-[#28292B]">
+                <div className="flex bg-[#1C1D1F] rounded-lg p-2 aspect-square items-center justify-center">
+                  <img
+                    className="h-[80%]"
+                    src="/assets/goal-wallet.png"
+                    alt="Ícone carteira ideal"
+                  />
+                </div>
+                <div className="flex flex-col flex-1 p-2 justify-center">
+                  <h3 className="dark:text-[#EDEEF0]">Carteira</h3>
+                  <h2 className="font-bold text-xl dark:text-[#EDEEF0]">Ideal</h2>
+                </div>
+                <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[13%] aspect-square items-center justify-center">
+                  <img src="/assets/seta-direita.png" alt="Seta para direita" />
+                </button>
+              </div>
+            </div>
+            <div className="bg-[#FFFFFF] flex-1  rounded-lg px-4 py-2 dark:bg-[#141414]">
+              <div className="flex bg-[#EDEEF0] gap-3 rounded-lg dark:bg-[#28292B]">
+                <div className="flex bg-[#1C1D1F] rounded-lg p-2 aspect-square items-center justify-center">
+                  <img
+                    className="h-[80%]"
+                    src="/assets/spoke-with.png"
+                    alt="Ícone falar com assessor"
+                  />
+                </div>
+                <div className="flex flex-col flex-1 p-2 justify-center">
+                  <h3 className="dark:text-[#EDEEF0]">Falar com</h3>
+                  <h2 className="font-bold text-xl dark:text-[#EDEEF0]">Assessor</h2>
+                </div>
+                <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[13%] aspect-square items-center justify-center">
+                  <img src="/assets/seta-direita.png" alt="Seta para direita" />
+                </button>
+              </div>
+            </div>
+            <div className="bg-[#FFFFFF] flex-1 rounded-lg px-4 py-2 dark:bg-[#141414]">
+              <div className="flex bg-[#EDEEF0] gap-3 rounded-lg dark:bg-[#28292B]">
+                <div className="flex bg-[#1C1D1F] rounded-lg p-2 aspect-square items-center justify-center">
+                  <img
+                    className="h-[80%]"
+                    src="/assets/spoke-with.png"
+                    alt="Ícone falar com assessorideal"
+                  />
+                </div>
+                <div className="flex flex-col flex-1 p-2 justify-center">
+                  <h3 className="dark:text-[#EDEEF0]">Falar com seu</h3>
+                  <h2 className="font-bold text-xl dark:text-[#EDEEF0]">Assessor</h2>
+                </div>
+                <button className="flex bg-[#1C1D1F] rounded-lg p-2 w-[13%] aspect-square items-center justify-center">
+                  <img src="/assets/seta-direita.png" alt="Seta para direita" />
+                </button>
+              </div>
+            </div>
           </div>
         </div>
       )}
 
       {successAlert && (
-        <div className="fixed bottom-4 right-4 bg-green-500 text-white px-4 py-2 rounded-md">
+        <div className="fixed bottom-4 right-4 bg-green-500 text-[#FFFFFF] px-4 py-2 rounded-md">
           Ativo atualizado com sucesso!
         </div>
       )}
 
       {errorAlert && (
-        <div className="fixed bottom-4 right-4 bg-red-500 text-white px-4 py-2 rounded-md">
+        <div className="fixed bottom-4 right-4 bg-red-500 text-[#FFFFFF] px-4 py-2 rounded-md">
           Ocorreu um erro ao atualizar o ativo. Por favor, tente novamente.
         </div>
       )}
-    </div>
+    </>
   );
 }
